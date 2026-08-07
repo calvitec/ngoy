@@ -2376,119 +2376,316 @@ def verification():
         account_dict, worker_dict, _, _ = build_lookups()
         
         submissions_response = supabase_request('GET', 'hs_submissions')
-        submissions = submissions_response['data'] if submissions_response['data'] else []
+        all_submissions = submissions_response['data'] if submissions_response['data'] else []
         
-        print(f"📊 Found {len(submissions)} total submissions")
+        print(f"📊 Found {len(all_submissions)} total submissions")
         print(f"👷 Found {len(worker_dict)} workers")
         print(f"📂 Found {len(account_dict)} accounts")
         
         worker_data = []
         
         for worker_id, worker in worker_dict.items():
-            worker_subs = [s for s in submissions if s.get('worker_id') == worker_id]
+            worker_subs = [s for s in all_submissions if s.get('worker_id') == worker_id]
             
+            # ============================================================
+            # 🔥 EVEN IF NO SUBMISSIONS, ADD WORKER WITH EMPTY DATA
+            # ============================================================
             if not worker_subs:
+                # Add worker with no submissions
+                worker_data.append({
+                    'worker_id': worker_id,
+                    'worker_name': worker.get('name', 'Unknown'),
+                    'account_name': 'No accounts',
+                    'client_rate': 15,
+                    'total_hours': 0,
+                    'total_hours_submissions': 0,
+                    'total_payment_amount': 0,
+                    'total_payment_proofs': 0,
+                    'expected_payment': 0,
+                    'payment_difference': 0,
+                    'weekly_data': [],
+                    'last_hours_submission': 'Never',
+                    'last_payment_submission': 'Never',
+                    'hours_submissions': [],
+                    'payment_submissions': [],
+                    'verification_status': 'no_data',
+                    'status_text': '📭 No Data',
+                    'status_color': 'gray',
+                    'hours_group': 'no_hours',
+                    'hours_group_label': '🚫 No Hours',
+                    'hours_group_color': 'gray',
+                    'weeks_matched': 0,
+                    'weeks_pending': 0,
+                    'weeks_fraud': 0,
+                    'weeks_issues': 0,
+                    'total_weeks': 0
+                })
                 continue
             
-            total_hours = 0
-            total_hours_submissions = 0
-            total_payment_amount = 0
-            total_payment_proofs = 0
-            hours_submissions = []
-            payment_submissions = []
-            last_hours_date = None
-            last_payment_date = None
-            days_worked = set()
-            
-            account_name = "Unknown"
-            client_rate = 15
+            # ============================================================
+            # 🔥 GROUP BY WEEK (Monday to Sunday)
+            # ============================================================
+            weekly_data = {}
             
             for s in worker_subs:
-                account_id = s.get('account_id')
-                account = account_dict.get(account_id, {})
-                if account:
-                    account_name = account.get('name', 'Unknown')
-                    client_rate = account.get('client_rate', 15)
-                
-                submission_type = s.get('submission_type', 'hours')
                 status = s.get('status')
-                
                 if status == 'rejected':
                     continue
                 
-                submission_date = None
-                if s.get('date'):
-                    try:
-                        submission_date = datetime.strptime(s.get('date'), '%Y-%m-%d').date()
-                        days_worked.add(str(submission_date))
-                    except:
-                        pass
+                submission_date_str = s.get('date')
+                if not submission_date_str:
+                    continue
                 
-                if submission_type == 'hours':
-                    hours = safe_float(s.get('hours'))
-                    total_hours += hours
-                    total_hours_submissions += 1
-                    hours_submissions.append({
-                        'date': s.get('date'),
+                try:
+                    submission_date = datetime.strptime(submission_date_str, '%Y-%m-%d').date()
+                except:
+                    continue
+                
+                # Calculate week (Monday to Sunday)
+                week_start = submission_date - timedelta(days=submission_date.weekday())
+                week_key = week_start.isoformat()
+                
+                if week_key not in weekly_data:
+                    weekly_data[week_key] = {
+                        'week_start': week_start,
+                        'week_end': week_start + timedelta(days=6),
+                        'hours': 0,
+                        'payment': 0,
+                        'hours_submissions': [],
+                        'payment_submissions': [],
+                        'has_hours': False,
+                        'has_payment': False,
+                        'client_rate': 15,
+                        'account_name': 'Unknown'
+                    }
+                
+                sub_type = s.get('submission_type', 'hours')
+                account_id = s.get('account_id')
+                account = account_dict.get(account_id, {})
+                if account:
+                    weekly_data[week_key]['account_name'] = account.get('name', 'Unknown')
+                    weekly_data[week_key]['client_rate'] = account.get('client_rate', 15)
+                
+                if sub_type == 'hours':
+                    hours = safe_float(s.get('hours', 0))
+                    weekly_data[week_key]['hours'] += hours
+                    weekly_data[week_key]['has_hours'] = True
+                    weekly_data[week_key]['hours_submissions'].append({
+                        'date': submission_date_str,
                         'hours': hours,
-                        'status': status
+                        'status': status,
+                        'day': submission_date.strftime('%A')
                     })
-                    if s.get('date'):
-                        last_hours_date = s.get('date')
                 
-                elif submission_type == 'payment_proof':
-                    amount = safe_float(s.get('total_earnings_usd'))
-                    total_payment_amount += amount
-                    total_payment_proofs += 1
-                    payment_submissions.append({
-                        'date': s.get('date'),
+                elif sub_type == 'payment_proof':
+                    amount = safe_float(s.get('total_earnings_usd', 0))
+                    weekly_data[week_key]['payment'] += amount
+                    weekly_data[week_key]['has_payment'] = True
+                    weekly_data[week_key]['payment_submissions'].append({
+                        'date': submission_date_str,
                         'amount': amount,
                         'status': status,
-                        'reference': s.get('payment_reference', 'N/A')
+                        'reference': s.get('payment_reference', 'N/A'),
+                        'screenshot': s.get('screenshot_url', ''),
+                        'day': submission_date.strftime('%A')
                     })
-                    if s.get('date'):
-                        last_payment_date = s.get('date')
             
-            if total_hours == 0 and total_payment_amount == 0:
+            if not weekly_data:
+                # Worker has submissions but all were rejected or no valid dates
+                worker_data.append({
+                    'worker_id': worker_id,
+                    'worker_name': worker.get('name', 'Unknown'),
+                    'account_name': 'No valid data',
+                    'client_rate': 15,
+                    'total_hours': 0,
+                    'total_hours_submissions': 0,
+                    'total_payment_amount': 0,
+                    'total_payment_proofs': 0,
+                    'expected_payment': 0,
+                    'payment_difference': 0,
+                    'weekly_data': [],
+                    'last_hours_submission': 'Never',
+                    'last_payment_submission': 'Never',
+                    'hours_submissions': [],
+                    'payment_submissions': [],
+                    'verification_status': 'no_data',
+                    'status_text': '📭 No Data',
+                    'status_color': 'gray',
+                    'hours_group': 'no_hours',
+                    'hours_group_label': '🚫 No Hours',
+                    'hours_group_color': 'gray',
+                    'weeks_matched': 0,
+                    'weeks_pending': 0,
+                    'weeks_fraud': 0,
+                    'weeks_issues': 0,
+                    'total_weeks': 0
+                })
                 continue
             
-            expected_payment = total_hours * client_rate
-            payment_difference = total_payment_amount - expected_payment
+            # ============================================================
+            # 🔥 PROCESS EACH WEEK
+            # ============================================================
+            week_results = []
+            total_hours_all = 0
+            total_payment_all = 0
+            total_expected_all = 0
+            all_hours_subs = []
+            all_payment_subs = []
+            last_hours_date = None
+            last_payment_date = None
+            account_name = "Unknown"
+            client_rate = 15
             
-            if total_hours > 0 and total_payment_amount > 0 and abs(payment_difference) <= 2:
-                verification_status = 'matched'
-                status_text = '✅ MATCHED'
-                status_color = 'green'
-            elif total_hours > 0 and total_payment_amount == 0:
-                verification_status = 'hours_without_payment'
-                status_text = '⏳ No Payment'
-                status_color = 'orange'
-            elif total_hours == 0 and total_payment_amount > 0:
-                verification_status = 'payment_without_hours'
-                status_text = '🚨 FRAUD!'
-                status_color = 'red'
-            elif payment_difference > 2:
-                verification_status = 'overpaid'
-                status_text = f'⚠️ OVERPAID +${payment_difference:.2f}'
-                status_color = 'yellow'
-            elif payment_difference < -2:
-                verification_status = 'underpaid'
-                status_text = f'⚠️ UNDERPAID ${abs(payment_difference):.2f}'
-                status_color = 'orange'
+            for week_key, week in sorted(weekly_data.items()):
+                client_rate = week['client_rate']
+                expected = week['hours'] * client_rate
+                difference = week['payment'] - expected
+                
+                # Calculate days between hours and payment
+                days_between = "N/A"
+                if week['has_hours'] and week['has_payment']:
+                    last_hour_date = week['hours_submissions'][-1]['date'] if week['hours_submissions'] else None
+                    last_payment_date = week['payment_submissions'][-1]['date'] if week['payment_submissions'] else None
+                    if last_hour_date and last_payment_date:
+                        try:
+                            h_date = datetime.strptime(last_hour_date, '%Y-%m-%d').date()
+                            p_date = datetime.strptime(last_payment_date, '%Y-%m-%d').date()
+                            days_between = abs((p_date - h_date).days)
+                        except:
+                            pass
+                
+                # Determine week status
+                if week['has_hours'] and week['has_payment'] and abs(difference) <= 2:
+                    week_status = 'matched'
+                    week_status_text = '✅ MATCHED'
+                    week_status_color = 'green'
+                elif week['has_hours'] and not week['has_payment']:
+                    week_status = 'pending_payment'
+                    week_status_text = '⏳ No Payment'
+                    week_status_color = 'orange'
+                elif not week['has_hours'] and week['has_payment']:
+                    week_status = 'fraud'
+                    week_status_text = '🚨 FRAUD! No Hours'
+                    week_status_color = 'red'
+                elif week['has_hours'] and week['has_payment'] and difference > 2:
+                    week_status = 'overpaid'
+                    week_status_text = f'⚠️ OVERPAID +${difference:.2f}'
+                    week_status_color = 'yellow'
+                elif week['has_hours'] and week['has_payment'] and difference < -2:
+                    week_status = 'underpaid'
+                    week_status_text = f'⚠️ UNDERPAID ${abs(difference):.2f}'
+                    week_status_color = 'orange'
+                else:
+                    week_status = 'unknown'
+                    week_status_text = '❓ Unknown'
+                    week_status_color = 'gray'
+                
+                week_results.append({
+                    'week_start': week['week_start'].strftime('%b %d'),
+                    'week_end': week['week_end'].strftime('%b %d'),
+                    'week_number': week['week_number'] if 'week_number' in week else '',
+                    'hours': round(week['hours'], 2),
+                    'payment': round(week['payment'], 2),
+                    'expected': round(expected, 2),
+                    'difference': round(difference, 2),
+                    'has_hours': week['has_hours'],
+                    'has_payment': week['has_payment'],
+                    'status': week_status,
+                    'status_text': week_status_text,
+                    'status_color': week_status_color,
+                    'hours_count': len(week['hours_submissions']),
+                    'payment_count': len(week['payment_submissions']),
+                    'hours_submissions': week['hours_submissions'],
+                    'payment_submissions': week['payment_submissions'],
+                    'days_between': days_between,
+                    'account_name': week['account_name']
+                })
+                
+                total_hours_all += week['hours']
+                total_payment_all += week['payment']
+                total_expected_all += expected
+                all_hours_subs.extend(week['hours_submissions'])
+                all_payment_subs.extend(week['payment_submissions'])
+                
+                if week['hours_submissions']:
+                    last_hours_date = week['hours_submissions'][-1].get('date', 'Never')
+                if week['payment_submissions']:
+                    last_payment_date = week['payment_submissions'][-1].get('date', 'Never')
+                
+                if week['account_name'] != 'Unknown':
+                    account_name = week['account_name']
+                    client_rate = week['client_rate']
+            
+            if total_hours_all == 0 and total_payment_all == 0:
+                # Worker has submissions but all are zero
+                worker_data.append({
+                    'worker_id': worker_id,
+                    'worker_name': worker.get('name', 'Unknown'),
+                    'account_name': account_name,
+                    'client_rate': client_rate,
+                    'total_hours': 0,
+                    'total_hours_submissions': len(all_hours_subs),
+                    'total_payment_amount': 0,
+                    'total_payment_proofs': len(all_payment_subs),
+                    'expected_payment': 0,
+                    'payment_difference': 0,
+                    'weekly_data': week_results,
+                    'last_hours_submission': last_hours_date or 'Never',
+                    'last_payment_submission': last_payment_date or 'Never',
+                    'hours_submissions': all_hours_subs,
+                    'payment_submissions': all_payment_subs,
+                    'verification_status': 'no_data',
+                    'status_text': '📭 No Data',
+                    'status_color': 'gray',
+                    'hours_group': 'no_hours',
+                    'hours_group_label': '🚫 No Hours',
+                    'hours_group_color': 'gray',
+                    'weeks_matched': 0,
+                    'weeks_pending': 0,
+                    'weeks_fraud': 0,
+                    'weeks_issues': 0,
+                    'total_weeks': len(week_results)
+                })
+                continue
+            
+            # Count weeks by status
+            matched_count = sum(1 for w in week_results if w['status'] == 'matched')
+            pending_count = sum(1 for w in week_results if w['status'] == 'pending_payment')
+            fraud_count = sum(1 for w in week_results if w['status'] == 'fraud')
+            issue_count = sum(1 for w in week_results if w['status'] in ['overpaid', 'underpaid', 'unknown'])
+            
+            # Determine overall status
+            if matched_count == len(week_results) and len(week_results) > 0:
+                overall_status = 'matched'
+                overall_status_text = f'✅ All {len(week_results)} Weeks Matched'
+                overall_status_color = 'green'
+            elif fraud_count > 0:
+                overall_status = 'fraud'
+                overall_status_text = f'🚨 {fraud_count} Week(s) Fraud'
+                overall_status_color = 'red'
+            elif issue_count > 0:
+                overall_status = 'issues'
+                overall_status_text = f'⚠️ {issue_count} Week(s) Issues'
+                overall_status_color = 'yellow'
+            elif pending_count > 0:
+                overall_status = 'pending'
+                overall_status_text = f'⏳ {pending_count} Week(s) Pending'
+                overall_status_color = 'orange'
             else:
-                verification_status = 'unknown'
-                status_text = '❓ Unknown'
-                status_color = 'gray'
+                overall_status = 'mixed'
+                overall_status_text = '⚠️ Mixed Status'
+                overall_status_color = 'yellow'
             
-            if total_hours == 0:
+            # Determine hours group
+            if total_hours_all == 0:
                 hours_group = 'no_hours'
                 group_label = '🚫 No Hours'
                 group_color = 'gray'
-            elif total_hours > 12:
+            elif total_hours_all > 12:
                 hours_group = 'high_performer'
                 group_label = '⭐ High Performer (>12h)'
                 group_color = 'green'
-            elif total_hours >= 8:
+            elif total_hours_all >= 8:
                 hours_group = 'good_worker'
                 group_label = '✅ Good Worker (8-12h)'
                 group_color = 'blue'
@@ -2502,27 +2699,33 @@ def verification():
                 'worker_name': worker.get('name', 'Unknown'),
                 'account_name': account_name,
                 'client_rate': client_rate,
-                'total_hours': round(total_hours, 2),
-                'total_hours_submissions': total_hours_submissions,
-                'total_payment_amount': round(total_payment_amount, 2),
-                'total_payment_proofs': total_payment_proofs,
-                'expected_payment': round(expected_payment, 2),
-                'payment_difference': round(payment_difference, 2),
-                'days_worked': len(days_worked),
+                'total_hours': round(total_hours_all, 2),
+                'total_hours_submissions': len(all_hours_subs),
+                'total_payment_amount': round(total_payment_all, 2),
+                'total_payment_proofs': len(all_payment_subs),
+                'expected_payment': round(total_expected_all, 2),
+                'payment_difference': round(total_payment_all - total_expected_all, 2),
+                'weekly_data': week_results,
                 'last_hours_submission': last_hours_date or 'Never',
                 'last_payment_submission': last_payment_date or 'Never',
-                'hours_submissions': hours_submissions,
-                'payment_submissions': payment_submissions,
-                'verification_status': verification_status,
-                'status_text': status_text,
-                'status_color': status_color,
+                'hours_submissions': all_hours_subs,
+                'payment_submissions': all_payment_subs,
+                'verification_status': overall_status,
+                'status_text': overall_status_text,
+                'status_color': overall_status_color,
                 'hours_group': hours_group,
                 'hours_group_label': group_label,
-                'hours_group_color': group_color
+                'hours_group_color': group_color,
+                'weeks_matched': matched_count,
+                'weeks_pending': pending_count,
+                'weeks_fraud': fraud_count,
+                'weeks_issues': issue_count,
+                'total_weeks': len(week_results)
             })
         
         print(f"✅ Processed {len(worker_data)} workers with data")
         
+        # Group workers
         grouped = {
             'high_performer': [],
             'good_worker': [],
@@ -2538,13 +2741,14 @@ def verification():
         for key in grouped:
             grouped[key].sort(key=lambda x: x['total_hours'], reverse=True)
         
+        # Calculate stats
         total_workers = len(worker_data)
-        matched_workers = sum(1 for w in worker_data if w.get('verification_status') == 'matched')
-        pending_payment = sum(1 for w in worker_data if w.get('verification_status') == 'hours_without_payment')
-        fraud_alerts = sum(1 for w in worker_data if w.get('verification_status') == 'payment_without_hours')
-        on_track_frequency = sum(1 for w in worker_data if w.get('verification_status') in ['matched', 'hours_without_payment'])
-        missing_hours = sum(1 for w in worker_data if w.get('total_hours') == 0)
-        missing_payment = sum(1 for w in worker_data if w.get('total_payment_amount') == 0)
+        matched_workers = sum(1 for w in worker_data if w.get('weeks_matched', 0) == w.get('total_weeks', 0) and w.get('total_weeks', 0) > 0)
+        pending_payment = sum(1 for w in worker_data if w.get('weeks_pending', 0) > 0 and w.get('weeks_matched', 0) == 0)
+        fraud_alerts = sum(1 for w in worker_data if w.get('weeks_fraud', 0) > 0)
+        on_track_frequency = sum(1 for w in worker_data if w.get('weeks_pending', 0) == 0 and w.get('weeks_fraud', 0) == 0 and w.get('weeks_issues', 0) == 0)
+        missing_hours = sum(1 for w in worker_data if w.get('total_hours') == 0 and w.get('total_weeks', 0) == 0)
+        missing_payment = sum(1 for w in worker_data if w.get('total_payment_amount') == 0 and w.get('total_weeks', 0) == 0)
         
         return render_template('verification.html',
             workers=worker_data,
@@ -2580,7 +2784,6 @@ def verification():
             now=datetime.now(),
             stats=get_handshake_stats()
         )
-
 # ============================================================
 # PAYMENT PROCESSING
 # ============================================================
