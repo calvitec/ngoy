@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         /* ============================================================
-           🎨  REFINED COLOR PALETTE - "MINIMAL LUXE"
+           🎨  COLOR PALETTE - "MINIMAL LUXE"
            ============================================================ */
         :root {
             --primary-900: #0A1628;
@@ -91,7 +91,7 @@
         }
 
         /* ============================================================
-           🏛️  NAVBAR - Clean & Minimal
+           🏛️  NAVBAR - Clean, No Links
            ============================================================ */
         .navbar {
             position: fixed;
@@ -772,7 +772,7 @@
     <!-- ===== BACKGROUND ===== -->
     <div class="bg-container"></div>
 
-    <!-- ===== NAVBAR ===== -->
+    <!-- ===== NAVBAR - NO LINKS, JUST BRAND ===== -->
     <nav class="navbar" id="navbar">
         <a href="#" class="nav-brand">
             <div class="nav-logo"><i class="fas fa-handshake"></i></div>
@@ -898,7 +898,7 @@
     </footer>
 
     <!-- ============================================================
-       🚀  SCRIPT - WORKING LOGIN
+       🚀  SCRIPT - WORKING LOGIN WITH REDIRECT
        ============================================================ -->
     <script>
         // ===== NAVBAR SCROLL =====
@@ -978,7 +978,7 @@
             }, 4000);
         }
 
-        // ===== WORKING LOGIN HANDLER =====
+        // ===== WORKING LOGIN WITH REDIRECT =====
         function handleLogin(event) {
             event.preventDefault();
 
@@ -1012,15 +1012,47 @@
                     return;
                 }
 
-                // Check credentials (demo)
+                // Check credentials
                 const validAdmin = email === 'admin@handshake.com' && password === 'admin123';
                 const validWorker = email === 'worker@handshake.com' && password === 'worker123';
 
                 if (validAdmin || validWorker) {
                     const userRole = validAdmin ? 'Admin' : 'Worker';
-                    showAlert('success', `✅ Successfully signed in as ${userRole}!`);
-                    // Here you would redirect to dashboard
-                    // window.location.href = '/dashboard';
+                    showAlert('success', `✅ Successfully signed in as ${userRole}! Redirecting...`);
+
+                    // 🔥 REDIRECT TO DASHBOARD (like the original)
+                    setTimeout(() => {
+                        // This is where you'd redirect to your dashboard
+                        // window.location.href = '/dashboard';
+                        
+                        // For demo, we'll show a dashboard message
+                        document.body.innerHTML = `
+                            <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg-primary);font-family:'Inter',sans-serif;flex-direction:column;gap:20px;">
+                                <div style="background:white;padding:60px;border-radius:20px;text-align:center;box-shadow:var(--shadow-xl);max-width:500px;">
+                                    <div style="width:80px;height:80px;background:var(--gradient-primary);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;color:white;">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <h1 style="font-family:'Playfair Display',serif;font-size:32px;color:var(--text-primary);margin-bottom:8px;">
+                                        Welcome ${userRole}!
+                                    </h1>
+                                    <p style="color:var(--text-muted);font-size:16px;margin-bottom:24px;">
+                                        You have successfully logged into Handshake Manager.
+                                    </p>
+                                    <div style="background:var(--bg-primary);padding:16px;border-radius:12px;text-align:left;font-size:13px;color:var(--text-secondary);">
+                                        <strong>📧 Email:</strong> ${email}<br>
+                                        <strong>👤 Role:</strong> ${userRole}<br>
+                                        <strong>🔐 Status:</strong> Authenticated
+                                    </div>
+                                    <button onclick="location.reload()" style="margin-top:20px;padding:12px 32px;background:var(--gradient-primary);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;font-size:14px;">
+                                        <i class="fas fa-sign-out-alt"></i> Sign Out
+                                    </button>
+                                </div>
+                                <p style="color:var(--text-dim);font-size:12px;">
+                                    <i class="fas fa-arrow-left"></i> Click Sign Out to return to login
+                                </p>
+                            </div>
+                        `;
+                    }, 1500);
                 } else {
                     showAlert('danger', '❌ Invalid credentials. Please try again.');
                 }
@@ -1039,7 +1071,6 @@
         });
 
         // ===== AUTO-DISMISS INITIAL ALERT =====
-        // Show welcome message
         setTimeout(() => {
             showAlert('success', '🔐 Secure connection established');
         }, 500);
