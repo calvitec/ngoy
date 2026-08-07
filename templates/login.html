@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Handshake Manager · Premium Platform</title>
+    <title>Handshake Manager · Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <style>
         /* ============================================================
            🎨  REFINED COLOR PALETTE - "MINIMAL LUXE"
-           Clean, sophisticated with just 3 accent colors
            ============================================================ */
         :root {
-            /* ----- PRIMARY: Deep Navy to Soft Blue ----- */
             --primary-900: #0A1628;
             --primary-800: #1A2A4A;
             --primary-700: #1E3A6F;
@@ -24,39 +22,29 @@
             --primary-100: #DBEAFE;
             --primary-50: #EFF6FF;
 
-            /* ----- SECONDARY: Soft Teal (minimal) ----- */
             --secondary-600: #0D9488;
             --secondary-500: #14B8A6;
             --secondary-400: #5EEAD4;
             --secondary-100: #F0FDFA;
 
-            /* ----- ACCENT: Warm Coral (just a touch) ----- */
-            --accent-600: #EA580C;
             --accent-500: #F97316;
-            --accent-100: #FFF7ED;
 
-            /* ----- SURFACE (Light & Clean) ----- */
             --bg-primary: #F8FAFC;
             --bg-secondary: #FFFFFF;
             --bg-card: #FFFFFF;
             --bg-hover: #F1F5F9;
 
-            /* ----- TEXT (Refined) ----- */
             --text-primary: #0F172A;
             --text-secondary: #334155;
             --text-muted: #64748B;
             --text-dim: #94A3B8;
 
-            /* ----- BORDERS ----- */
             --border-subtle: #E2E8F0;
             --border-medium: #CBD5E1;
-            --border-strong: #94A3B8;
 
-            /* ----- GRADIENTS (Refined) ----- */
             --gradient-primary: linear-gradient(135deg, #1E3A6F 0%, #2563EB 50%, #3B82F6 100%);
             --gradient-secondary: linear-gradient(135deg, #0D9488 0%, #14B8A6 100%);
 
-            /* ----- SHADOWS (Soft) ----- */
             --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.08);
@@ -91,7 +79,7 @@
         }
 
         /* ============================================================
-           🌟  BACKGROUND - Clean Gradient
+           🌟  BACKGROUND
            ============================================================ */
         .bg-container {
             position: fixed;
@@ -158,96 +146,25 @@
             color: var(--primary-600);
         }
 
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary-500);
-            transition: width 0.25s ease;
-            border-radius: 2px;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .nav-cta {
-            padding: 10px 24px;
-            background: var(--gradient-primary);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 2px 12px rgba(37, 99, 235, 0.25);
-        }
-
-        .nav-cta:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.35);
-        }
-
         /* ============================================================
-           🚀  HERO SECTION
+           🚀  HERO - Full Page Login
            ============================================================ */
         .hero {
             min-height: 100vh;
             display: flex;
             align-items: center;
-            padding: 120px 60px 80px;
-            position: relative;
+            justify-content: center;
+            padding: 100px 20px 60px;
         }
 
         .hero-container {
-            max-width: 1300px;
-            margin: 0 auto;
+            max-width: 480px;
             width: 100%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
         }
 
-        /* LEFT CONTENT */
         .hero-left {
-            animation: fadeSlideUp 0.8s ease forwards;
-        }
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            text-align: center;
+            margin-bottom: 32px;
         }
 
         .hero-badge {
@@ -262,7 +179,7 @@
             font-weight: 600;
             color: var(--primary-600);
             letter-spacing: 0.3px;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
 
         .hero-badge .dot {
@@ -280,12 +197,11 @@
 
         .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(42px, 5vw, 64px);
+            font-size: 36px;
             font-weight: 900;
-            line-height: 1.08;
             color: var(--text-primary);
-            margin-bottom: 20px;
-            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 8px;
         }
 
         .hero-title .highlight {
@@ -295,55 +211,20 @@
         }
 
         .hero-description {
-            font-size: 17px;
+            font-size: 15px;
             color: var(--text-muted);
-            line-height: 1.7;
-            max-width: 460px;
-            margin-bottom: 32px;
+            max-width: 400px;
+            margin: 0 auto 8px;
         }
 
-        .hero-stats {
-            display: flex;
-            gap: 40px;
-        }
-
-        .stat-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .stat-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 32px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .stat-number .small {
-            font-size: 16px;
-            font-weight: 400;
-            color: var(--text-muted);
-            font-family: 'Inter', sans-serif;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        /* RIGHT - LOGIN CARD */
-        .hero-right {
-            animation: fadeSlideUp 0.8s ease 0.15s both;
-        }
-
+        /* ============================================================
+           🔐  LOGIN CARD
+           ============================================================ */
         .login-card {
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: 20px;
-            padding: 44px 40px;
+            padding: 40px 36px;
             box-shadow: var(--shadow-lg);
             transition: all 0.3s ease;
         }
@@ -383,7 +264,7 @@
             margin-top: 2px;
         }
 
-        /* ROLE SELECTOR - Simplified */
+        /* ROLE SELECTOR */
         .role-selector {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -472,6 +353,12 @@
             color: var(--secondary-600);
         }
 
+        .alert-danger {
+            background: #FEF2F2;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #DC2626;
+        }
+
         .alert i {
             margin-top: 2px;
             flex-shrink: 0;
@@ -493,7 +380,7 @@
             opacity: 1;
         }
 
-        /* FORM FIELDS - Clean */
+        /* FORM FIELDS */
         .field-group {
             margin-bottom: 16px;
         }
@@ -785,116 +672,21 @@
         }
 
         /* ============================================================
-           📊  FEATURES SECTION - Clean & Minimal
-           ============================================================ */
-        .features-section {
-            padding: 80px 60px 100px;
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        .features-header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .features-header .tag {
-            display: inline-block;
-            padding: 5px 16px;
-            background: var(--primary-50);
-            border: 1px solid var(--border-subtle);
-            border-radius: 50px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--primary-600);
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-            margin-bottom: 14px;
-        }
-
-        .features-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 38px;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1.1;
-        }
-
-        .features-header h2 span {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .features-header p {
-            font-size: 17px;
-            color: var(--text-muted);
-            max-width: 520px;
-            margin: 10px auto 0;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-        }
-
-        .feature-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 28px 24px;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-4px);
-            border-color: var(--border-medium);
-            box-shadow: var(--shadow-md);
-        }
-
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 14px;
-            font-size: 20px;
-            color: white;
-        }
-
-        .feature-item h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-        }
-
-        .feature-item p {
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        /* ============================================================
-           📋  FOOTER - Clean
+           📋  FOOTER
            ============================================================ */
         .footer {
-            padding: 32px 60px;
+            padding: 24px 60px;
             border-top: 1px solid var(--border-subtle);
             text-align: center;
             color: var(--text-muted);
             font-size: 13px;
             background: var(--bg-card);
+            margin-top: 20px;
         }
 
         .footer-brand {
             font-weight: 700;
-            font-size: 17px;
+            font-size: 16px;
             color: var(--text-primary);
         }
 
@@ -905,8 +697,8 @@
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
-            margin: 10px 0 6px;
+            gap: 20px;
+            margin: 8px 0 4px;
             flex-wrap: wrap;
         }
 
@@ -924,61 +716,18 @@
         /* ============================================================
            📱  RESPONSIVE
            ============================================================ */
-        @media (max-width: 1200px) {
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .hero-container {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            .hero-left {
-                text-align: center;
-            }
-            .hero-description {
-                margin: 0 auto 32px;
-            }
-            .hero-stats {
-                justify-content: center;
-            }
-            .navbar {
-                padding: 14px 30px;
-            }
-            .hero {
-                padding: 100px 30px 60px;
-            }
-            .features-section {
-                padding: 60px 30px 80px;
-            }
-        }
-
         @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
             .navbar {
                 padding: 12px 20px;
             }
             .hero {
-                padding: 80px 20px 40px;
+                padding: 80px 16px 40px;
             }
             .login-card {
                 padding: 28px 20px;
             }
-            .features-section {
-                padding: 40px 20px 60px;
-            }
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            .hero-stats {
-                flex-direction: column;
-                gap: 12px;
-                align-items: center;
+            .hero-title {
+                font-size: 28px;
             }
             .quick-grid {
                 grid-template-columns: 1fr;
@@ -989,17 +738,14 @@
                 align-items: flex-start;
             }
             .footer {
-                padding: 20px;
+                padding: 16px 20px;
             }
             .footer-links {
-                gap: 14px;
+                gap: 12px;
             }
         }
 
         @media (max-width: 480px) {
-            .hero-title {
-                font-size: 32px;
-            }
             .login-card {
                 padding: 20px 16px;
             }
@@ -1007,11 +753,16 @@
                 font-size: 11px;
                 padding: 8px 10px;
             }
-            .features-header h2 {
-                font-size: 28px;
+            .hero-title {
+                font-size: 24px;
             }
-            .feature-item {
-                padding: 20px 16px;
+            .nav-brand-text {
+                font-size: 17px;
+            }
+            .nav-logo {
+                width: 34px;
+                height: 34px;
+                font-size: 16px;
             }
         }
     </style>
@@ -1027,179 +778,113 @@
             <div class="nav-logo"><i class="fas fa-handshake"></i></div>
             <span class="nav-brand-text">Handshake<span>Manager</span></span>
         </a>
-        <ul class="nav-links">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#solutions">Solutions</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#about">About</a></li>
-            <li><button class="nav-cta" onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})">
-                <i class="fas fa-arrow-right-to-bracket"></i> Get Started
-            </button></li>
-        </ul>
     </nav>
 
-    <!-- ===== HERO ===== -->
+    <!-- ===== HERO - LOGIN CENTERED ===== -->
     <section class="hero" id="home">
         <div class="hero-container">
-            <!-- LEFT -->
+            <!-- Brand Message -->
             <div class="hero-left">
                 <div class="hero-badge">
                     <span class="dot"></span>
-                    Trusted by 500+ Enterprises
+                    Secure Enterprise Platform
                 </div>
                 <h1 class="hero-title">
-                    Smart <span class="highlight">Handshake</span><br>
-                    Management Platform
+                    Welcome to <span class="highlight">Handshake</span>
                 </h1>
-                <p class="hero-description">
-                    Streamline agreements, track partnerships, and manage protocols
-                    with enterprise-grade security and precision.
-                </p>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">99.9<span class="small">%</span></span>
-                        <span class="stat-label">Uptime</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">AES-<span class="small">256</span></span>
-                        <span class="stat-label">Encryption</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">10K<span class="small">+</span></span>
-                        <span class="stat-label">Users</span>
-                    </div>
-                </div>
+                <p class="hero-description">Sign in to manage your agreements and partnerships.</p>
             </div>
 
-            <!-- RIGHT - LOGIN CARD -->
-            <div class="hero-right" id="loginSection">
-                <div class="login-card">
-                    <div class="login-header">
-                        <div class="login-avatar"><i class="fas fa-user-shield"></i></div>
-                        <h3 class="login-title">Welcome Back</h3>
-                        <p class="login-subtitle">Sign in to your account</p>
+            <!-- LOGIN CARD -->
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-avatar"><i class="fas fa-user-shield"></i></div>
+                    <h3 class="login-title">Sign In</h3>
+                    <p class="login-subtitle">Access your account securely</p>
+                </div>
+
+                <!-- Alert Messages -->
+                <div id="alertContainer"></div>
+
+                <!-- Role Selector -->
+                <div class="role-selector">
+                    <button class="role-btn active-admin" data-role="admin" onclick="selectRole('admin')">
+                        <i class="fas fa-shield-alt"></i>
+                        Admin
+                        <span class="role-badge">Access</span>
+                    </button>
+                    <button class="role-btn" data-role="worker" onclick="selectRole('worker')">
+                        <i class="fas fa-user"></i>
+                        Worker
+                        <span class="role-badge">Access</span>
+                    </button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <input type="hidden" name="role" id="selectedRole" value="admin" />
+
+                    <div class="field-group">
+                        <label for="email">Email Address</label>
+                        <div class="field-input">
+                            <input type="email" id="email" name="email" placeholder="you@company.com" value="admin@handshake.com" required />
+                            <i class="fas fa-envelope icon"></i>
+                        </div>
                     </div>
 
-                    <!-- Alert -->
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Secure connection established</span>
-                        <button class="alert-close" onclick="this.closest('.alert').remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                    <div class="field-group">
+                        <label for="password">Password</label>
+                        <div class="field-input">
+                            <input type="password" id="password" name="password" placeholder="••••••••" value="admin123" required />
+                            <i class="fas fa-lock icon"></i>
+                            <button type="button" class="toggle-pw" id="pwToggle">
+                                <i class="fas fa-eye" id="pwIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Role Selector -->
-                    <div class="role-selector">
-                        <button class="role-btn active-admin" data-role="admin" onclick="selectRole('admin')">
-                            <i class="fas fa-shield-alt"></i>
-                            Admin
-                            <span class="role-badge">Access</span>
-                        </button>
-                        <button class="role-btn" data-role="worker" onclick="selectRole('worker')">
-                            <i class="fas fa-user"></i>
-                            Worker
-                            <span class="role-badge">Access</span>
-                        </button>
-                    </div>
-
-                    <!-- Form -->
-                    <form method="POST" action="/login" id="loginForm">
-                        <input type="hidden" name="role" id="selectedRole" value="admin" />
-
-                        <div class="field-group">
-                            <label for="email">Email Address</label>
-                            <div class="field-input">
-                                <input type="email" id="email" name="email" placeholder="you@company.com" value="admin@handshake.com" required autofocus />
-                                <i class="fas fa-envelope icon"></i>
-                            </div>
-                        </div>
-
-                        <div class="field-group">
-                            <label for="password">Password</label>
-                            <div class="field-input">
-                                <input type="password" id="password" name="password" placeholder="••••••••" value="admin123" required />
-                                <i class="fas fa-lock icon"></i>
-                                <button type="button" class="toggle-pw" id="pwToggle">
-                                    <i class="fas fa-eye" id="pwIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="options-row">
-                            <label class="custom-checkbox">
-                                <input type="checkbox" name="remember" id="remember" />
-                                <span class="checkmark">
-                                    <svg viewBox="0 0 12 10">
-                                        <polyline points="1.5 5.5 4.5 8.5 10.5 1.5" />
-                                    </svg>
-                                </span>
-                                Keep me signed in
-                            </label>
-                            <a href="#" class="forgot-link">Forgot password?</a>
-                        </div>
-
-                        <button type="submit" class="btn-submit admin-mode" id="loginBtn">
-                            <span class="btn-content">
-                                <span class="btn-icon"><i class="fas fa-arrow-right-to-bracket"></i></span>
-                                <div class="btn-spinner"></div>
-                                <span class="btn-label">Sign In</span>
+                    <div class="options-row">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="remember" id="remember" />
+                            <span class="checkmark">
+                                <svg viewBox="0 0 12 10">
+                                    <polyline points="1.5 5.5 4.5 8.5 10.5 1.5" />
+                                </svg>
                             </span>
-                        </button>
-                    </form>
+                            Keep me signed in
+                        </label>
+                        <a href="#" class="forgot-link">Forgot password?</a>
+                    </div>
 
-                    <!-- Quick Access -->
-                    <div class="quick-access">
-                        <div class="quick-label">Quick Access</div>
-                        <div class="quick-grid">
-                            <div class="quick-card admin-quick" onclick="fillLogin('admin@handshake.com','admin123','admin')">
-                                <div class="quick-role"><i class="fas fa-shield-alt"></i> Admin</div>
-                                <div class="quick-email">admin@handshake.com</div>
-                            </div>
-                            <div class="quick-card worker-quick" onclick="fillLogin('worker@handshake.com','worker123','worker')">
-                                <div class="quick-role"><i class="fas fa-user"></i> Worker</div>
-                                <div class="quick-email">worker@handshake.com</div>
-                            </div>
+                    <button type="submit" class="btn-submit admin-mode" id="loginBtn">
+                        <span class="btn-content">
+                            <span class="btn-icon"><i class="fas fa-arrow-right-to-bracket"></i></span>
+                            <div class="btn-spinner"></div>
+                            <span class="btn-label">Sign In</span>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Quick Access -->
+                <div class="quick-access">
+                    <div class="quick-label">Quick Access</div>
+                    <div class="quick-grid">
+                        <div class="quick-card admin-quick" onclick="fillLogin('admin@handshake.com','admin123','admin')">
+                            <div class="quick-role"><i class="fas fa-shield-alt"></i> Admin</div>
+                            <div class="quick-email">admin@handshake.com</div>
+                        </div>
+                        <div class="quick-card worker-quick" onclick="fillLogin('worker@handshake.com','worker123','worker')">
+                            <div class="quick-role"><i class="fas fa-user"></i> Worker</div>
+                            <div class="quick-email">worker@handshake.com</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== FEATURES ===== -->
-    <section class="features-section" id="features">
-        <div class="features-header">
-            <span class="tag">Why Handshake Manager</span>
-            <h2>Built for <span>Enterprise</span> Success</h2>
-            <p>Everything you need to manage partnerships and agreements at scale</p>
-        </div>
-        <div class="features-grid">
-            <div class="feature-item">
-                <div class="feature-icon"><i class="fas fa-handshake"></i></div>
-                <h3>Smart Agreements</h3>
-                <p>Create and manage digital agreements with automated tracking.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
-                <h3>Enterprise Security</h3>
-                <p>AES-256 encryption with multi-factor authentication.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Real-time Analytics</h3>
-                <p>Monitor performance with detailed dashboards and insights.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon"><i class="fas fa-users"></i></div>
-                <h3>Team Collaboration</h3>
-                <p>Seamless collaboration with role-based access controls.</p>
             </div>
         </div>
     </section>
 
     <!-- ===== FOOTER ===== -->
-    <footer class="footer" id="about">
+    <footer class="footer">
         <div class="footer-brand">Handshake<span>Manager</span></div>
         <div class="footer-links">
             <a href="#">Privacy Policy</a>
@@ -1207,14 +892,16 @@
             <a href="#">Support</a>
             <a href="#">Contact</a>
         </div>
-        <p style="font-size: 12px; margin-top: 6px; color: var(--text-dim);">
+        <p style="font-size: 12px; margin-top: 4px; color: var(--text-dim);">
             &copy; 2026 Handshake Manager. Crafted with <i class="fas fa-heart" style="color: var(--accent-500);"></i> by Miss Ngonyoh
         </p>
     </footer>
 
-    <!-- ===== SCRIPT ===== -->
+    <!-- ============================================================
+       🚀  SCRIPT - WORKING LOGIN
+       ============================================================ -->
     <script>
-        // Navbar scroll
+        // ===== NAVBAR SCROLL =====
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
@@ -1224,7 +911,7 @@
             }
         });
 
-        // Role selector
+        // ===== ROLE SELECTOR =====
         function selectRole(role) {
             const buttons = document.querySelectorAll('.role-btn');
             const btn = document.querySelector(`.role-btn[data-role="${role}"]`);
@@ -1235,24 +922,22 @@
                 document.getElementById('selectedRole').value = 'admin';
                 const submitBtn = document.getElementById('loginBtn');
                 submitBtn.className = 'btn-submit admin-mode';
-                document.querySelector('.btn-label').textContent = 'Sign In';
             } else {
                 btn.classList.add('active-worker');
                 document.getElementById('selectedRole').value = 'worker';
                 const submitBtn = document.getElementById('loginBtn');
                 submitBtn.className = 'btn-submit worker-mode';
-                document.querySelector('.btn-label').textContent = 'Sign In';
             }
         }
 
-        // Fill login quick
+        // ===== FILL LOGIN QUICK =====
         function fillLogin(email, password, role) {
             document.getElementById('email').value = email;
             document.getElementById('password').value = password;
             selectRole(role);
         }
 
-        // Password toggle
+        // ===== PASSWORD TOGGLE =====
         document.getElementById('pwToggle').addEventListener('click', function() {
             const pw = document.getElementById('password');
             const icon = document.getElementById('pwIcon');
@@ -1265,40 +950,99 @@
             }
         });
 
-        // Submit loading
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            btn.classList.add('loading');
-            const role = document.getElementById('selectedRole').value;
-            document.querySelector('.btn-label').textContent = 'Authenticating...';
-
-            setTimeout(() => {
-                btn.classList.remove('loading');
-                document.querySelector('.btn-label').textContent = 'Sign In';
-                // Show success message
-                const alertDiv = document.querySelector('.alert');
-                alertDiv.className = 'alert alert-success';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle"></i>
-                    <span>✓ Successfully signed in as ${role}</span>
+        // ===== SHOW ALERT =====
+        function showAlert(type, message) {
+            const container = document.getElementById('alertContainer');
+            const icons = {
+                success: 'fa-check-circle',
+                danger: 'fa-exclamation-circle'
+            };
+            container.innerHTML = `
+                <div class="alert alert-${type}">
+                    <i class="fas ${icons[type]}"></i>
+                    <span>${message}</span>
                     <button class="alert-close" onclick="this.closest('.alert').remove()">
                         <i class="fas fa-times"></i>
                     </button>
-                `;
-                alertDiv.style.display = 'flex';
-            }, 2000);
+                </div>
+            `;
+            // Auto dismiss after 4 seconds
+            setTimeout(() => {
+                const alert = container.querySelector('.alert');
+                if (alert) {
+                    alert.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-8px)';
+                    setTimeout(() => alert.remove(), 500);
+                }
+            }, 4000);
+        }
+
+        // ===== WORKING LOGIN HANDLER =====
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const role = document.getElementById('selectedRole').value;
+
+            // Get button and show loading
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('loading');
+            document.querySelector('.btn-label').textContent = 'Authenticating...';
+
+            // Simulate API call
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                document.querySelector('.btn-label').textContent = 'Sign In';
+
+                // Simple validation
+                if (!email || !password) {
+                    showAlert('danger', 'Please enter both email and password.');
+                    return;
+                }
+
+                if (!email.includes('@') || !email.includes('.')) {
+                    showAlert('danger', 'Please enter a valid email address.');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showAlert('danger', 'Password must be at least 6 characters.');
+                    return;
+                }
+
+                // Check credentials (demo)
+                const validAdmin = email === 'admin@handshake.com' && password === 'admin123';
+                const validWorker = email === 'worker@handshake.com' && password === 'worker123';
+
+                if (validAdmin || validWorker) {
+                    const userRole = validAdmin ? 'Admin' : 'Worker';
+                    showAlert('success', `✅ Successfully signed in as ${userRole}!`);
+                    // Here you would redirect to dashboard
+                    // window.location.href = '/dashboard';
+                } else {
+                    showAlert('danger', '❌ Invalid credentials. Please try again.');
+                }
+            }, 1500);
+        }
+
+        // ===== ENTER KEY SUPPORT =====
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('loginForm');
+                if (document.activeElement === document.getElementById('email') ||
+                    document.activeElement === document.getElementById('password')) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            }
         });
 
-        // Auto dismiss alerts
+        // ===== AUTO-DISMISS INITIAL ALERT =====
+        // Show welcome message
         setTimeout(() => {
-            document.querySelectorAll('.alert').forEach(a => {
-                a.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
-                a.style.opacity = '0';
-                a.style.transform = 'translateY(-8px)';
-                setTimeout(() => a.remove(), 500);
-            });
-        }, 5000);
+            showAlert('success', '🔐 Secure connection established');
+        }, 500);
     </script>
 
 </body>
