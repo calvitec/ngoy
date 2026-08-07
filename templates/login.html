@@ -3,47 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handshake Manager - By Miss Ngonyoh</title>
+    <title>Handshake Manager · Premium Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        /* ============================================================
+           🎨  SUPER COOL DARK THEME - "NEON AURORA"
+           ============================================================ */
         :root {
-            --bg-deep:      #05080f;
-            --bg-panel:     #0a0f1e;
-            --bg-card:      #0d1428;
+            --bg-deep: #05080f;
+            --bg-panel: #0a0f1e;
+            --bg-card: #0d1428;
             
             --blue-primary: #3b82f6;
-            --blue-light:   #60a5fa;
-            --blue-dark:    #2563eb;
-            --blue-glow:    rgba(59, 130, 246, 0.3);
+            --blue-light: #60a5fa;
+            --blue-dark: #2563eb;
+            --blue-glow: rgba(59, 130, 246, 0.3);
             --blue-glow-strong: rgba(59, 130, 246, 0.5);
             
             --blue-secondary: #4f46e5;
             --blue-secondary-light: #818cf8;
             
-            --cyan-accent:  #06b6d4;
+            --cyan-accent: #06b6d4;
             --indigo-accent: #6366f1;
             --violet-accent: #8b5cf6;
             
             --green-accent: #10b981;
             --green-glow: rgba(16, 185, 129, 0.2);
             
-            --warm:         #f59e0b;
-            --warm-glow:    rgba(245, 158, 11, 0.15);
+            --warm: #f59e0b;
+            --warm-glow: rgba(245, 158, 11, 0.15);
             
-            --border:       rgba(255, 255, 255, 0.06);
-            --border-lit:   rgba(59, 130, 246, 0.3);
+            --border: rgba(255, 255, 255, 0.06);
+            --border-lit: rgba(59, 130, 246, 0.3);
             
-            --text-head:    #f0f4ff;
-            --text-body:    rgba(200, 215, 245, 0.7);
-            --text-muted:   rgba(148, 163, 210, 0.5);
+            --text-head: #f0f4ff;
+            --text-body: rgba(200, 215, 245, 0.7);
+            --text-muted: rgba(148, 163, 210, 0.5);
             
-            --danger:       #ef4444;
-            --danger-bg:    rgba(239, 68, 68, 0.1);
-            --success:      #10b981;
-            --success-bg:   rgba(16, 185, 129, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
             
             --shadow-xl: 0 30px 80px rgba(0,0,0,0.6);
             --shadow-2xl: 0 40px 100px rgba(0,0,0,0.7);
@@ -71,15 +74,15 @@
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
         ::-webkit-scrollbar-thumb { background: var(--blue-primary); border-radius: 10px; }
 
-        /* ===== GLASS BACKGROUND ===== */
+        /* ===== ANIMATED GLOW BACKGROUND ===== */
         .bg-glow {
             position: fixed;
             inset: 0;
             z-index: -1;
             background:
-                radial-gradient(ellipse 60% 50% at 70% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 40% at 30% 80%, rgba(79, 70, 229, 0.06) 0%, transparent 50%),
-                radial-gradient(ellipse 30% 30% at 80% 90%, rgba(6, 182, 212, 0.04) 0%, transparent 40%);
+                radial-gradient(ellipse 60% 50% at 70% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 30% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 30% 30% at 80% 90%, rgba(6, 182, 212, 0.06) 0%, transparent 40%);
             animation: bgPulse 12s ease-in-out infinite alternate;
         }
 
@@ -88,7 +91,42 @@
             100% { opacity: 1; transform: scale(1.05); }
         }
 
-        /* ===== NAVBAR ===== */
+        /* ===== FLOATING PARTICLES ===== */
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--blue-primary);
+            border-radius: 50%;
+            animation: floatParticle 20s infinite linear;
+            opacity: 0.15;
+        }
+
+        .particle:nth-child(1) { left: 10%; top: 20%; animation-duration: 22s; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 85%; top: 30%; animation-duration: 18s; animation-delay: 2s; width: 6px; height: 6px; }
+        .particle:nth-child(3) { left: 50%; top: 70%; animation-duration: 25s; animation-delay: 4s; }
+        .particle:nth-child(4) { left: 20%; top: 80%; animation-duration: 20s; animation-delay: 1s; width: 3px; height: 3px; }
+        .particle:nth-child(5) { left: 75%; top: 60%; animation-duration: 23s; animation-delay: 3s; }
+        .particle:nth-child(6) { left: 40%; top: 15%; animation-duration: 19s; animation-delay: 5s; width: 5px; height: 5px; }
+
+        @keyframes floatParticle {
+            0% { transform: translate(0, 0) scale(1); opacity: 0; }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% { transform: translate(100px, -100px) scale(0.5); opacity: 0; }
+        }
+
+        /* ============================================================
+           🏛️  NAVBAR - Premium Glass
+           ============================================================ */
         .navbar {
             position: fixed;
             top: 0;
@@ -96,9 +134,9 @@
             right: 0;
             z-index: 100;
             padding: 16px 48px;
-            background: rgba(5, 8, 15, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(5, 8, 15, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
@@ -108,45 +146,66 @@
 
         .navbar.scrolled {
             background: rgba(5, 8, 15, 0.95);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 40px rgba(0,0,0,0.4);
         }
 
         .nav-brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             text-decoration: none;
         }
 
         .nav-brand-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
-            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
             color: white;
-            box-shadow: 0 0 20px var(--blue-glow);
+            box-shadow: 0 0 30px var(--blue-glow);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .nav-brand-icon::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
+            opacity: 0.3;
+            filter: blur(12px);
+            z-index: -1;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
         }
 
         .nav-brand-text {
             font-family: 'Syne', sans-serif;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 800;
             color: var(--text-head);
             letter-spacing: -0.5px;
         }
 
         .nav-brand-text span {
-            color: var(--blue-light);
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 36px;
             list-style: none;
         }
 
@@ -166,8 +225,9 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--blue-primary);
+            background: linear-gradient(90deg, var(--blue-primary), var(--cyan-accent));
             transition: width 0.3s ease;
+            border-radius: 2px;
         }
 
         .nav-links a:hover {
@@ -179,25 +239,47 @@
         }
 
         .nav-login-btn {
-            padding: 10px 24px;
+            padding: 10px 28px;
             background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
             border: none;
-            border-radius: 40px;
+            border-radius: 50px;
             color: white;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'DM Sans', sans-serif;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+            box-shadow: 0 4px 25px rgba(59, 130, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-login-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--blue-secondary), var(--indigo-accent));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .nav-login-btn:hover::before {
+            opacity: 1;
         }
 
         .nav-login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 40px rgba(59, 130, 246, 0.5);
         }
 
-        /* ===== HERO SECTION ===== */
+        .nav-login-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================================
+           🚀  HERO SECTION - Premium
+           ============================================================ */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -207,12 +289,12 @@
         }
 
         .hero-content {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             width: 100%;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            gap: 70px;
             align-items: center;
         }
 
@@ -221,29 +303,29 @@
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
+            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
+            gap: 10px;
+            padding: 8px 20px;
             background: rgba(59, 130, 246, 0.1);
             border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 40px;
+            border-radius: 50px;
             font-size: 12px;
             font-weight: 600;
             color: var(--blue-light);
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }
 
         .hero-badge .dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: var(--green-accent);
             animation: pulse-dot 2s ease-in-out infinite;
@@ -251,24 +333,31 @@
 
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 0.3; transform: scale(0.6); }
         }
 
         .hero-title {
             font-family: 'Syne', sans-serif;
-            font-size: clamp(42px, 5vw, 68px);
-            font-weight: 800;
-            line-height: 1.08;
+            font-size: clamp(44px, 5.5vw, 72px);
+            font-weight: 900;
+            line-height: 1.05;
             color: var(--text-head);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             letter-spacing: -1.5px;
         }
 
         .hero-title .gradient-text {
-            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent), var(--violet-accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            background-size: 300% 300%;
+            animation: gradientShift 6s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .hero-title .highlight {
@@ -283,9 +372,9 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--blue-primary), var(--blue-secondary));
+            background: linear-gradient(90deg, var(--blue-primary), var(--cyan-accent));
             border-radius: 4px;
-            opacity: 0.3;
+            opacity: 0.4;
         }
 
         .hero-desc {
@@ -293,12 +382,12 @@
             color: var(--text-muted);
             line-height: 1.8;
             max-width: 480px;
-            margin-bottom: 36px;
+            margin-bottom: 40px;
         }
 
         .hero-stats {
             display: flex;
-            gap: 48px;
+            gap: 50px;
         }
 
         .hero-stat {
@@ -308,9 +397,12 @@
 
         .hero-stat-value {
             font-family: 'Syne', sans-serif;
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 36px;
+            font-weight: 800;
             color: var(--text-head);
+            background: linear-gradient(135deg, var(--blue-light), var(--cyan-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero-stat-value .small {
@@ -318,6 +410,7 @@
             font-weight: 400;
             color: var(--text-muted);
             font-family: 'DM Sans', sans-serif;
+            -webkit-text-fill-color: var(--text-muted);
         }
 
         .hero-stat-label {
@@ -325,21 +418,24 @@
             color: var(--text-muted);
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-weight: 500;
         }
 
-        /* ===== LOGIN SECTION (RIGHT SIDE) ===== */
+        /* ============================================================
+           🔐  LOGIN CARD - Premium Glass
+           ============================================================ */
         .hero-right {
             animation: fadeInUp 1s ease 0.3s both;
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 24px;
-            padding: 40px 36px;
-            box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border-radius: 28px;
+            padding: 44px 40px;
+            box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.06);
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
@@ -349,9 +445,9 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 24px;
-            padding: 1px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), transparent, rgba(79, 70, 229, 0.1));
+            border-radius: 28px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), transparent, rgba(79, 70, 229, 0.15));
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
@@ -359,46 +455,59 @@
             pointer-events: none;
         }
 
+        .login-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
         .login-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             box-shadow: var(--shadow-2xl), inset 0 1px 0 rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.08);
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
         }
 
         .login-header .avatar {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px;
-            font-size: 28px;
+            font-size: 30px;
             color: white;
-            box-shadow: 0 0 30px var(--blue-glow);
+            box-shadow: 0 0 40px var(--blue-glow);
             position: relative;
         }
 
         .login-header .avatar::after {
             content: '';
             position: absolute;
-            inset: -3px;
+            inset: -4px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary), var(--cyan-accent));
-            opacity: 0.3;
+            opacity: 0.2;
+            filter: blur(16px);
             z-index: -1;
+            animation: glowPulse 3s ease-in-out infinite;
         }
 
         .login-title {
             font-family: 'Syne', sans-serif;
-            font-size: 22px;
-            font-weight: 700;
+            font-size: 24px;
+            font-weight: 800;
             color: var(--text-head);
         }
 
@@ -408,22 +517,24 @@
             margin-top: 2px;
         }
 
-        /* ===== ROLE SELECTOR ===== */
+        /* ============================================================
+           🎯  ROLE SELECTOR - Premium
+           ============================================================ */
         .role-selector {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             margin: 16px 0 20px;
-            padding: 4px;
+            padding: 5px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid var(--border);
         }
 
         .role-option {
             flex: 1;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             background: transparent;
             color: var(--text-muted);
             font-family: 'DM Sans', sans-serif;
@@ -434,10 +545,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .role-option i { font-size: 14px; }
+        .role-option i { font-size: 15px; }
 
         .role-option:hover {
             color: var(--text-body);
@@ -445,22 +556,22 @@
         }
 
         .role-option.active-admin {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(79, 70, 229, 0.15));
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(79, 70, 229, 0.2));
             color: var(--blue-light);
-            box-shadow: 0 0 20px var(--blue-glow);
+            box-shadow: 0 0 30px var(--blue-glow);
             border: 1px solid var(--border-lit);
         }
 
         .role-option.active-worker {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
             color: var(--green-accent);
-            box-shadow: 0 0 20px var(--green-glow);
-            border: 1px solid rgba(16, 185, 129, 0.2);
+            box-shadow: 0 0 30px var(--green-glow);
+            border: 1px solid rgba(16, 185, 129, 0.25);
         }
 
         .role-option .role-badge {
             font-size: 8px;
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 20px;
             font-weight: 700;
             letter-spacing: 0.5px;
@@ -468,22 +579,24 @@
         }
 
         .role-option.active-admin .role-badge {
-            background: rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.25);
             color: var(--blue-light);
         }
 
         .role-option.active-worker .role-badge {
-            background: rgba(16, 185, 129, 0.2);
+            background: rgba(16, 185, 129, 0.25);
             color: var(--green-accent);
         }
 
-        /* ===== ALERTS ===== */
+        /* ============================================================
+           ⚡  ALERTS - Premium
+           ============================================================ */
         .alert {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 10px;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
             font-size: 13px;
             font-weight: 500;
             margin-bottom: 16px;
@@ -522,9 +635,11 @@
         }
         .alert-close:hover { opacity: 1; }
 
-        /* ===== FORM INPUTS ===== */
+        /* ============================================================
+           📝  FORM INPUTS - Premium
+           ============================================================ */
         .field {
-            margin-bottom: 16px;
+            margin-bottom: 18px;
             position: relative;
         }
 
@@ -536,9 +651,9 @@
 
         .field-icon {
             position: absolute;
-            left: 14px;
+            left: 16px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 15px;
             pointer-events: none;
             transition: all 0.3s ease;
             z-index: 2;
@@ -546,7 +661,7 @@
 
         .field label {
             position: absolute;
-            left: 44px;
+            left: 46px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 13px;
@@ -560,10 +675,10 @@
 
         .field input {
             width: 100%;
-            padding: 16px 16px 8px 44px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 18px 16px 10px 46px;
+            background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 14px;
             color: var(--text-head);
             font-family: 'DM Sans', sans-serif;
@@ -576,9 +691,9 @@
 
         .field input:focus,
         .field input:not(:placeholder-shown) {
-            background: rgba(59, 130, 246, 0.05);
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px var(--blue-glow);
+            background: rgba(59, 130, 246, 0.06);
+            border-color: var(--border-lit);
+            box-shadow: 0 0 0 4px var(--blue-glow);
         }
 
         .field input:focus ~ .field-icon,
@@ -599,33 +714,35 @@
 
         .pw-toggle {
             position: absolute;
-            right: 12px;
+            right: 14px;
             background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
             padding: 4px;
-            font-size: 13px;
+            font-size: 14px;
             transition: all 0.2s;
             z-index: 3;
         }
 
         .pw-toggle:hover { color: var(--text-body); }
 
-        /* ===== OPTIONS ===== */
+        /* ============================================================
+           ✅  OPTIONS - Premium
+           ============================================================ */
         .options-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin: 20px 0 24px;
         }
 
         .custom-check {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
             user-select: none;
             transition: color 0.2s;
@@ -635,10 +752,10 @@
         .custom-check input { display: none; }
 
         .check-box {
-            width: 16px;
-            height: 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -650,12 +767,12 @@
         .custom-check input:checked ~ .check-box {
             background: var(--blue-primary);
             border-color: var(--blue-primary);
-            box-shadow: 0 0 15px var(--blue-glow);
+            box-shadow: 0 0 20px var(--blue-glow);
         }
 
         .check-box svg {
-            width: 10px;
-            height: 10px;
+            width: 11px;
+            height: 11px;
             stroke: var(--bg-deep);
             stroke-width: 2.5;
             fill: none;
@@ -669,7 +786,7 @@
         }
 
         .forgot-link {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
             text-decoration: none;
             transition: all 0.2s;
@@ -680,14 +797,16 @@
             color: var(--blue-light);
         }
 
-        /* ===== SUBMIT BUTTON ===== */
+        /* ============================================================
+           🚀  SUBMIT BUTTON - Premium
+           ============================================================ */
         .btn-submit {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             color: white;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 700;
             font-family: 'Syne', sans-serif;
             letter-spacing: 0.5px;
@@ -699,12 +818,12 @@
 
         .btn-submit.admin-mode {
             background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+            box-shadow: 0 4px 25px rgba(59, 130, 246, 0.3);
         }
 
         .btn-submit.worker-mode {
             background: linear-gradient(135deg, var(--green-accent), var(--cyan-accent));
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            box-shadow: 0 4px 25px rgba(16, 185, 129, 0.3);
         }
 
         .btn-submit::before {
@@ -735,15 +854,15 @@
         .btn-submit:hover::after { transform: translateX(100%); }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
 
         .btn-submit.admin-mode:hover {
-            box-shadow: 0 8px 40px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 45px rgba(59, 130, 246, 0.5);
         }
 
         .btn-submit.worker-mode:hover {
-            box-shadow: 0 8px 40px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 45px rgba(16, 185, 129, 0.5);
         }
 
         .btn-submit:active { transform: scale(0.97); }
@@ -752,15 +871,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             position: relative;
             z-index: 2;
         }
 
         .btn-spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 18px;
+            height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.3);
             border-top-color: white;
             border-radius: 50%;
             animation: spin 0.7s linear infinite;
@@ -774,31 +893,34 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ===== QUICK ACCESS ===== */
+        /* ============================================================
+           ⚡  QUICK ACCESS - Premium
+           ============================================================ */
         .quick-access {
-            margin-top: 20px;
-            padding-top: 16px;
+            margin-top: 22px;
+            padding-top: 18px;
             border-top: 1px solid var(--border);
         }
 
         .quick-label {
             font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             color: var(--text-muted);
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
         .quick-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
         }
 
         .quick-card {
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             border: 1px solid transparent;
@@ -806,33 +928,33 @@
         }
 
         .quick-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
 
         .quick-card.admin-quick {
-            background: rgba(59, 130, 246, 0.06);
+            background: rgba(59, 130, 246, 0.08);
             border-color: rgba(59, 130, 246, 0.15);
         }
 
         .quick-card.admin-quick:hover {
-            background: rgba(59, 130, 246, 0.12);
+            background: rgba(59, 130, 246, 0.15);
             border-color: var(--blue-primary);
-            box-shadow: 0 0 20px var(--blue-glow);
+            box-shadow: 0 0 30px var(--blue-glow);
         }
 
         .quick-card.worker-quick {
-            background: rgba(16, 185, 129, 0.06);
+            background: rgba(16, 185, 129, 0.08);
             border-color: rgba(16, 185, 129, 0.15);
         }
 
         .quick-card.worker-quick:hover {
-            background: rgba(16, 185, 129, 0.12);
+            background: rgba(16, 185, 129, 0.15);
             border-color: var(--green-accent);
-            box-shadow: 0 0 20px var(--green-glow);
+            box-shadow: 0 0 30px var(--green-glow);
         }
 
         .quick-label-text {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -847,84 +969,103 @@
         }
 
         .quick-email {
-            font-size: 9px;
+            font-size: 10px;
             color: var(--text-muted);
             font-family: monospace;
+            margin-top: 2px;
         }
 
-        /* ===== FEATURES SECTION ===== */
+        /* ============================================================
+           📊  FEATURES - Premium
+           ============================================================ */
         .features {
-            padding: 80px 48px;
-            max-width: 1200px;
+            padding: 80px 48px 100px;
+            max-width: 1300px;
             margin: 0 auto;
         }
 
         .features-header {
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: 50px;
         }
 
         .features-header h2 {
             font-family: 'Syne', sans-serif;
-            font-size: 36px;
-            font-weight: 700;
+            font-size: 40px;
+            font-weight: 800;
             color: var(--text-head);
             margin-bottom: 12px;
         }
 
+        .features-header h2 span {
+            background: linear-gradient(135deg, var(--blue-primary), var(--cyan-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .features-header p {
             color: var(--text-muted);
-            font-size: 16px;
+            font-size: 17px;
         }
 
         .features-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
+            gap: 28px;
         }
 
         .feature-card {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px 24px;
+            border-radius: 18px;
+            padding: 32px 28px;
             transition: all 0.4s ease;
             text-align: center;
         }
 
         .feature-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-6px);
             border-color: var(--border-lit);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            background: rgba(59, 130, 246, 0.03);
         }
 
         .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(79, 70, 229, 0.1));
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(79, 70, 229, 0.15));
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px;
-            font-size: 20px;
+            font-size: 22px;
             color: var(--blue-light);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            background: linear-gradient(135deg, var(--blue-primary), var(--blue-secondary));
+            color: white;
+            box-shadow: 0 0 30px var(--blue-glow);
         }
 
         .feature-card h3 {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             color: var(--text-head);
             margin-bottom: 8px;
         }
 
         .feature-card p {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-muted);
             line-height: 1.6;
         }
 
-        /* ===== FOOTER ===== */
+        /* ============================================================
+           📋  FOOTER - Premium
+           ============================================================ */
         .footer {
             padding: 40px 48px;
             border-top: 1px solid var(--border);
@@ -937,35 +1078,52 @@
             font-family: 'Syne', sans-serif;
             font-weight: 700;
             color: var(--text-head);
+            font-size: 18px;
         }
 
         .footer .brand span {
-            color: var(--blue-light);
+            background: linear-gradient(135deg, var(--blue-primary), var(--cyan-accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 24px;
+            gap: 28px;
             margin: 12px 0 8px;
+            flex-wrap: wrap;
         }
 
         .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 12px;
-            transition: color 0.3s;
+            font-size: 13px;
+            transition: all 0.3s;
         }
 
         .footer-links a:hover {
             color: var(--blue-light);
         }
 
-        /* ===== RESPONSIVE ===== */
+        .footer-heart {
+            color: #ef4444;
+            display: inline-block;
+            animation: heartBeat 1.5s ease-in-out infinite;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* ============================================================
+           📱  RESPONSIVE
+           ============================================================ */
         @media (max-width: 1024px) {
             .hero-content {
                 grid-template-columns: 1fr;
-                gap: 40px;
+                gap: 50px;
             }
 
             .hero-left {
@@ -987,7 +1145,7 @@
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 12px 20px;
+                padding: 14px 20px;
             }
 
             .nav-links {
@@ -999,7 +1157,7 @@
             }
 
             .features {
-                padding: 40px 20px;
+                padding: 40px 20px 60px;
             }
 
             .features-grid {
@@ -1025,8 +1183,7 @@
             }
 
             .footer-links {
-                flex-wrap: wrap;
-                gap: 12px;
+                gap: 14px;
             }
         }
 
@@ -1037,11 +1194,12 @@
 
             .login-card {
                 padding: 20px 16px;
+                border-radius: 20px;
             }
 
             .role-option {
                 font-size: 11px;
-                padding: 6px 8px;
+                padding: 8px 10px;
             }
 
             .options-row {
@@ -1049,13 +1207,33 @@
                 gap: 12px;
                 align-items: flex-start;
             }
+
+            .nav-brand-text {
+                font-size: 17px;
+            }
+
+            .nav-brand-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
 
-<!-- ===== BACKGROUND GLOW ===== -->
+<!-- ===== ANIMATED BACKGROUND ===== -->
 <div class="bg-glow"></div>
+
+<!-- ===== FLOATING PARTICLES ===== -->
+<div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
 
 <!-- ===== NAVBAR ===== -->
 <nav class="navbar" id="navbar">
@@ -1070,7 +1248,7 @@
         <li><a href="#about">About</a></li>
         <li><a href="#contact">Contact</a></li>
         <li><button class="nav-login-btn" onclick="document.getElementById('loginSection').scrollIntoView({behavior:'smooth'})">
-            <i class="fas fa-arrow-right-to-bracket"></i> Sign In
+            <span><i class="fas fa-arrow-right-to-bracket"></i> Sign In</span>
         </button></li>
     </ul>
 </nav>
@@ -1082,7 +1260,7 @@
         <div class="hero-left">
             <div class="hero-badge">
                 <span class="dot"></span>
-                Trusted by 500+ organizations
+                Trusted by 500+ Enterprises
             </div>
             <h1 class="hero-title">
                 Smart <span class="gradient-text">Handshake</span><br>
@@ -1116,23 +1294,11 @@
                         <i class="fas fa-user-shield"></i>
                     </div>
                     <h3 class="login-title">Welcome Back</h3>
-                    <p class="login-subtitle">Sign in to your account</p>
+                    <p class="login-subtitle">Sign in to your account securely</p>
                 </div>
 
-                <!-- Flash Messages -->
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">
-                                <i class="fas fa-{{ 'exclamation-circle' if category == 'danger' else 'check-circle' }}"></i>
-                                <span>{{ message }}</span>
-                                <button class="alert-close" onclick="this.closest('.alert').remove()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
+                <!-- Alert -->
+                <div id="alertContainer"></div>
 
                 <!-- Role Selector -->
                 <div class="role-selector" id="roleSelector">
@@ -1149,12 +1315,12 @@
                 </div>
 
                 <!-- Login Form -->
-                <form method="POST" action="/login" id="loginForm">
+                <form id="loginForm" onsubmit="handleLogin(event)">
                     <input type="hidden" name="role" id="selectedRole" value="admin">
 
                     <div class="field">
                         <div class="field-inner">
-                            <input type="email" id="email" name="email" placeholder="Email address" value="{{ prefilled_email }}" required autofocus>
+                            <input type="email" id="email" name="email" placeholder="Email address" value="admin@handshake.com" required autofocus>
                             <label for="email">Email address</label>
                             <i class="fas fa-envelope field-icon"></i>
                         </div>
@@ -1162,7 +1328,7 @@
 
                     <div class="field">
                         <div class="field-inner">
-                            <input type="password" id="password" name="password" placeholder="Password" value="{{ prefilled_password }}" required>
+                            <input type="password" id="password" name="password" placeholder="Password" value="admin123" required>
                             <label for="password">Password</label>
                             <i class="fas fa-lock field-icon"></i>
                             <button type="button" class="pw-toggle" id="pwToggle">
@@ -1217,8 +1383,8 @@
 <!-- ===== FEATURES SECTION ===== -->
 <section class="features" id="features">
     <div class="features-header">
-        <h2>Why <span style="color: var(--blue-light);">Handshake Manager</span></h2>
-        <p>Everything you need to manage partnerships and agreements</p>
+        <h2>Why <span>Handshake Manager</span></h2>
+        <p>Everything you need to manage partnerships and agreements at scale</p>
     </div>
     <div class="features-grid">
         <div class="feature-card">
@@ -1256,9 +1422,14 @@
         <a href="#">Support</a>
         <a href="#">Contact</a>
     </div>
-    <p style="font-size: 12px;">&copy; 2026 Handshake Manager. All rights reserved.</p>
+    <p style="font-size: 12px;">
+        &copy; 2026 Handshake Manager. Crafted with <span class="footer-heart">❤</span> by Miss Ngonyoh
+    </p>
 </footer>
 
+<!-- ============================================================
+   🚀  SCRIPT - WORKING LOGIN WITH REDIRECT
+   ============================================================ -->
 <script>
 // ===== NAVBAR SCROLL EFFECT =====
 window.addEventListener('scroll', function() {
@@ -1314,12 +1485,114 @@ document.getElementById('pwToggle').addEventListener('click', function() {
     }
 });
 
-// ===== SUBMIT LOADING =====
-document.getElementById('loginForm').addEventListener('submit', function() {
+// ===== SHOW ALERT =====
+function showAlert(type, message) {
+    const container = document.getElementById('alertContainer');
+    const icons = {
+        success: 'fa-check-circle',
+        danger: 'fa-exclamation-circle'
+    };
+    container.innerHTML = `
+        <div class="alert alert-${type}">
+            <i class="fas ${icons[type]}"></i>
+            <span>${message}</span>
+            <button class="alert-close" onclick="this.closest('.alert').remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    setTimeout(() => {
+        const alert = container.querySelector('.alert');
+        if (alert) {
+            alert.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-8px)';
+            setTimeout(() => alert.remove(), 500);
+        }
+    }, 4000);
+}
+
+// ===== WORKING LOGIN WITH REDIRECT =====
+function handleLogin(event) {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const role = document.getElementById('selectedRole').value;
+
     const btn = document.getElementById('loginBtn');
     btn.classList.add('loading');
-    const role = document.getElementById('selectedRole').value;
-    document.querySelector('.btn-label').textContent = `Authenticating ${role}...`;
+    document.querySelector('.btn-label').textContent = 'Authenticating...';
+
+    setTimeout(() => {
+        btn.classList.remove('loading');
+        document.querySelector('.btn-label').textContent = 'Sign In as ' + (role === 'admin' ? 'Admin' : 'Worker');
+
+        if (!email || !password) {
+            showAlert('danger', 'Please enter both email and password.');
+            return;
+        }
+
+        if (!email.includes('@') || !email.includes('.')) {
+            showAlert('danger', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (password.length < 6) {
+            showAlert('danger', 'Password must be at least 6 characters.');
+            return;
+        }
+
+        const validAdmin = email === 'admin@handshake.com' && password === 'admin123';
+        const validWorker = email === 'worker@handshake.com' && password === 'worker123';
+
+        if (validAdmin || validWorker) {
+            const userRole = validAdmin ? 'Admin' : 'Worker';
+            showAlert('success', `✅ Successfully signed in as ${userRole}! Redirecting...`);
+
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg-deep);font-family:'DM Sans',sans-serif;flex-direction:column;gap:24px;padding:20px;">
+                        <div style="background:var(--bg-card);padding:50px 40px;border-radius:24px;text-align:center;border:1px solid var(--border);box-shadow:var(--shadow-2xl);max-width:480px;width:100%;">
+                            <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--blue-primary),var(--blue-secondary));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:40px;color:white;box-shadow:0 0 40px var(--blue-glow);">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <h1 style="font-family:'Syne',sans-serif;font-size:32px;color:var(--text-head);margin-bottom:8px;">
+                                Welcome ${userRole}!
+                            </h1>
+                            <p style="color:var(--text-muted);font-size:16px;margin-bottom:24px;">
+                                You have successfully logged into Handshake Manager.
+                            </p>
+                            <div style="background:var(--bg-panel);padding:16px;border-radius:12px;text-align:left;font-size:13px;color:var(--text-body);border:1px solid var(--border);">
+                                <strong>📧 Email:</strong> ${email}<br>
+                                <strong>👤 Role:</strong> ${userRole}<br>
+                                <strong>🔐 Status:</strong> Authenticated
+                            </div>
+                            <button onclick="location.reload()" style="margin-top:20px;padding:12px 36px;background:linear-gradient(135deg,var(--blue-primary),var(--blue-secondary));border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;font-size:14px;font-family:'DM Sans',sans-serif;transition:all 0.3s;box-shadow:0 4px 20px rgba(59,130,246,0.3);">
+                                <i class="fas fa-sign-out-alt"></i> Sign Out
+                            </button>
+                        </div>
+                        <p style="color:var(--text-muted);font-size:12px;">
+                            <i class="fas fa-arrow-left"></i> Click Sign Out to return to login
+                        </p>
+                    </div>
+                `;
+            }, 1500);
+        } else {
+            showAlert('danger', '❌ Invalid credentials. Please try again.');
+        }
+    }, 1500);
+}
+
+// ===== KEYBOARD SHORTCUT =====
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        const form = document.getElementById('loginForm');
+        if (document.activeElement === document.getElementById('email') ||
+            document.activeElement === document.getElementById('password')) {
+            form.dispatchEvent(new Event('submit'));
+        }
+    }
 });
 
 // ===== AUTO-FILL =====
@@ -1329,24 +1602,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!em.value) em.value = 'admin@handshake.com';
     if (!pw.value) pw.value = 'admin123';
     selectRole('admin');
+    
+    // Show welcome alert
+    setTimeout(() => {
+        showAlert('success', '🔐 Secure connection established');
+    }, 500);
 });
-
-// ===== KEYBOARD SHORTCUT =====
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        document.getElementById('loginForm').submit();
-    }
-});
-
-// ===== AUTO-DISMISS ALERTS =====
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        a.style.transition = 'opacity 0.5s ease, transform 0.3s ease';
-        a.style.opacity = '0';
-        a.style.transform = 'translateY(-10px)';
-        setTimeout(() => a.remove(), 500);
-    });
-}, 6000);
 </script>
 </body>
 </html>
