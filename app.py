@@ -637,35 +637,53 @@ def worker_dashboard():
     user_email = session.get('user_email', 'worker@handshake.com')
     
     try:
+        print("=" * 60)
+        print("🔍 WORKER DASHBOARD DEBUG")
+        print(f"👤 User ID: {user_id}")
+        print("=" * 60)
+        
+        # Get assignments
         assignments_response = supabase_request('GET', 'hs_worker_assignments', filters={'worker_id': user_id})
         assignments = assignments_response['data'] if assignments_response['data'] else []
+        print(f"📋 Assignments: {len(assignments)}")
         
+        # Get all accounts
         accounts_response = supabase_request('GET', 'hs_accounts')
         all_accounts = accounts_response['data'] if accounts_response['data'] else []
         
-        assigned_ids = []
-        for a in assignments:
-            assigned_ids.append(a['account_id'])
+        # Filter accounts assigned to this worker
+        assigned_ids = [a['account_id'] for a in assignments]
+        accounts = [acc for acc in all_accounts if acc['id'] in assigned_ids]
+        print(f"📂 Accounts: {len(accounts)}")
         
-        accounts = []
-        for acc in all_accounts:
-            if acc['id'] in assigned_ids:
-                accounts.append(acc)
+        # Get ALL submissions
+        submissions_response = supabase_request('GET', 'hs_submissions')
+        all_submissions = submissions_response['data'] if submissions_response['data'] else []
+        print(f"📝 Total Submissions in DB: {len(all_submissions)}")
         
-        submissions_response = supabase_request('GET', 'hs_submissions', filters={'worker_id': user_id})
-        submissions = submissions_response['data'] if submissions_response['data'] else []
+        # Filter submissions by worker_id
+        submissions = []
+        for s in all_submissions:
+            if s.get('worker_id') == user_id:
+                submissions.append(s)
         
-        account_dict = {acc['id']: acc for acc in all_accounts}
-        for s in submissions:
-            acc = account_dict.get(s.get('account_id'))
-            s['account_name'] = safe_str(acc.get('name', 'Unknown') if acc else 'Unknown')
+        print(f"📝 Submissions for this worker: {len(submissions)}")
         
+        # Debug: Print submissions
+        if len(submissions) == 0:
+            print("   ⚠️ NO SUBMISSIONS FOUND")
+        else:
+            for idx, s in enumerate(submissions):
+                print(f"  [{idx}] ID: {s.get('id')}, Status: {s.get('status')}, Hours: {s.get('hours')}, Payout: {s.get('worker_payout_usd')}")
+        
+        # Get settings
         settings = get_settings()
         exchange_rate = settings.get('exchange_rate', 150)
         
-        total_hours = 0
-        total_earnings_usd = 0
-        total_earnings_kes = 0
+        # Initialize with 0 (not None)
+        total_hours = 0.0
+        total_earnings_usd = 0.0
+        total_earnings_kes = 0.0
         pending_submissions = 0
         approved_submissions = 0
         rejected_submissions = 0
@@ -673,55 +691,73 @@ def worker_dashboard():
         pending_payment_proofs = 0
         total_payment_proofs = 0
         
+        # Process each submission
         for s in submissions:
             sub_type = s.get('submission_type', 'hours')
             status = s.get('status')
             
-            hours_val = safe_float(s.get('hours'))
-            payout_usd = safe_float(s.get('worker_payout_usd'))
-            payout_kes = safe_float(s.get('worker_payout_kes', payout_usd * exchange_rate))
+            hours_val = safe_float(s.get('hours', 0))
+            worker_payout_usd = safe_float(s.get('worker_payout_usd', 0))
+            
+            # If payout is 0, try to calculate it
+            if worker_payout_usd == 0:
+                total_earnings = safe_float(s.get('total_earnings_usd', 0))
+                worker_percentage = safe_float(s.get('worker_percentage', 10))
+                if total_earnings > 0:
+                    worker_payout_usd = total_earnings * (worker_percentage / 100)
+                elif hours_val > 0:
+                    account_id = s.get('account_id')
+                    account = next((a for a in all_accounts if a.get('id') == account_id), None)
+                    if account:
+                        client_rate = safe_float(account.get('client_rate', 15))
+                        total_earnings = hours_val * client_rate
+                        worker_payout_usd = total_earnings * (worker_percentage / 100)
+            
+            worker_payout_kes = safe_float(s.get('worker_payout_kes', worker_payout_usd * exchange_rate))
             
             if sub_type == 'payment_proof':
                 total_payment_proofs += 1
             
             if status == 'paid':
                 paid_submissions += 1
-                if sub_type == 'hours':
-                    total_hours += hours_val
-                    total_earnings_usd += payout_usd
-                    total_earnings_kes += payout_kes
-                elif sub_type == 'payment_proof':
-                    total_earnings_usd += payout_usd
-                    total_earnings_kes += payout_kes
-                    
+                total_hours += hours_val
+                total_earnings_usd += worker_payout_usd
+                total_earnings_kes += worker_payout_kes
             elif status == 'approved':
                 approved_submissions += 1
-                if sub_type == 'hours':
-                    total_hours += hours_val
-                    total_earnings_usd += payout_usd
-                    total_earnings_kes += payout_kes
-                elif sub_type == 'payment_proof':
-                    if not s.get('payment_confirmed'):
-                        pending_payment_proofs += 1
-                    total_earnings_usd += payout_usd
-                    total_earnings_kes += payout_kes
-                    
+                total_hours += hours_val
+                total_earnings_usd += worker_payout_usd
+                total_earnings_kes += worker_payout_kes
             elif status == 'pending':
                 pending_submissions += 1
                 if sub_type == 'payment_proof':
                     pending_payment_proofs += 1
-                    
             elif status == 'rejected':
                 rejected_submissions += 1
         
+        # Make sure all values are numbers (not None)
+        total_hours = float(total_hours or 0)
+        total_earnings_usd = float(total_earnings_usd or 0)
+        total_earnings_kes = float(total_earnings_kes or 0)
+        
+        print("=" * 60)
+        print(f"📊 FINAL TOTALS: Hours={total_hours}, USD=${total_earnings_usd}, KES=KSh{total_earnings_kes}")
+        print("=" * 60)
+        
+        # Add account names to submissions
+        account_dict = {acc['id']: acc for acc in all_accounts}
+        for s in submissions:
+            acc = account_dict.get(s.get('account_id'))
+            s['account_name'] = safe_str(acc.get('name', 'Unknown') if acc else 'Unknown')
+        
         stats = get_handshake_stats()
         
-        return render_template('worker_dashboard.html', 
+        return render_template('worker_dashboard.html',
             accounts=accounts,
             submissions=submissions,
-            total_hours=round(total_hours, 2),
-            total_earnings_usd=round(total_earnings_usd, 2),
-            total_earnings_kes=round(total_earnings_kes, 2),
+            total_hours=total_hours,
+            total_earnings_usd=total_earnings_usd,
+            total_earnings_kes=total_earnings_kes,
             pending_submissions=pending_submissions,
             approved_submissions=approved_submissions,
             rejected_submissions=rejected_submissions,
@@ -735,12 +771,13 @@ def worker_dashboard():
             now=datetime.now(),
             stats=stats
         )
+        
     except Exception as e:
         print(f"❌ ERROR: {str(e)}")
         import traceback
         traceback.print_exc()
         flash(f'Error loading worker dashboard: {str(e)}', 'danger')
-        return render_template('worker_dashboard.html', 
+        return render_template('worker_dashboard.html',
             accounts=[],
             submissions=[], 
             total_hours=0,
@@ -759,7 +796,6 @@ def worker_dashboard():
             now=datetime.now(), 
             stats=get_handshake_stats()
         )
-
 # ============================================================
 # SUBMIT HOURS
 # ============================================================

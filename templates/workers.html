@@ -37,13 +37,13 @@
 <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-6 p-4">
     <div class="flex flex-wrap items-center gap-3">
         <span class="text-sm font-medium text-gray-700">Bulk Actions:</span>
-        <button onclick="sendBulkWhatsApp()" class="btn btn-success btn-sm">
+        <button onclick="sendBulkWhatsApp()" class="px-3 py-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition text-sm font-medium flex items-center gap-1">
             <i class="fab fa-whatsapp"></i> Send Login to All
         </button>
-        <button onclick="selectAllWorkers()" class="btn btn-sm bg-gray-100 text-gray-600 hover:bg-gray-200">
+        <button onclick="selectAllWorkers()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm font-medium flex items-center gap-1">
             <i class="fas fa-check-double"></i> Select All
         </button>
-        <button onclick="deselectAll()" class="btn btn-sm bg-gray-100 text-gray-600 hover:bg-gray-200">
+        <button onclick="deselectAll()" class="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition text-sm font-medium flex items-center gap-1">
             <i class="fas fa-times"></i> Deselect All
         </button>
         <span class="text-xs text-gray-400 ml-auto" id="selectedCount">0 selected</span>
@@ -51,169 +51,232 @@
 </div>
 
 <!-- Workers Table -->
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fas fa-users text-blue-500 mr-2"></i>All Workers</h3>
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-700"><i class="fas fa-users text-indigo-500 mr-2"></i>All Workers</h3>
         <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">{{ workers|length }} total</span>
-            <button onclick="openModal()" class="btn btn-primary btn-sm">
+            <span class="text-sm text-gray-400">{{ workers|length }} total</span>
+            <button onclick="openModal()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm font-medium flex items-center gap-1">
                 <i class="fas fa-plus"></i> Add Worker
             </button>
         </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th class="w-8">
-                            <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()" class="rounded border-gray-300">
-                        </th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>WhatsApp</th>
-                        <th class="text-center">Login Sent</th>
-                        <th class="text-center">WhatsApp</th>
-                        <th class="text-center">Actions</th>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="w-8 px-4 py-3">
+                        <input type="checkbox" id="selectAll" onchange="toggleAllCheckboxes()" class="rounded border-gray-300">
+                    </th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">WhatsApp</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">Login Sent</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">WhatsApp</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% if workers %}
+                    {% for worker in workers %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3">
+                            <input type="checkbox" class="worker-checkbox rounded border-gray-300" value="{{ worker.id }}" onchange="updateSelectedCount()">
+                        </td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ worker.name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ worker.email }}</td>
+                        <td class="px-4 py-3">
+                            {% if worker.whatsapp %}
+                                <span class="text-green-600">✅ {{ worker.whatsapp }}</span>
+                            {% else %}
+                                <span class="text-gray-400">Not set</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {% if worker.login_sent %}
+                                <span class="text-xs bg-green-100 text-green-700 px-2.5 py-1 rounded-full">
+                                    <i class="fas fa-check"></i> Sent
+                                </span>
+                            {% else %}
+                                <span class="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">
+                                    <i class="fas fa-clock"></i> Not sent
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {% if worker.whatsapp %}
+                                <a href="{{ generate_whatsapp_login_link(worker) }}" target="_blank" 
+                                   class="text-green-500 hover:text-green-700 text-sm">
+                                    <i class="fab fa-whatsapp text-xl"></i>
+                                </a>
+                            {% else %}
+                                <span class="text-gray-300 text-sm">No number</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center justify-center gap-1.5">
+                                {% if worker.whatsapp %}
+                                <a href="{{ generate_whatsapp_login_link(worker) }}" target="_blank" 
+                                   class="px-2.5 py-1.5 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition text-xs font-medium flex items-center gap-1">
+                                    <i class="fab fa-whatsapp"></i> Send
+                                </a>
+                                {% endif %}
+                                <button onclick="editWorker('{{ worker.id }}')" class="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </button>
+                                <button onclick="deleteWorker('{{ worker.id }}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% if workers %}
-                        {% for worker in workers %}
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="worker-checkbox" value="{{ worker.id }}" onchange="updateSelectedCount()">
-                            </td>
-                            <td class="font-medium">{{ worker.name }}</td>
-                            <td>{{ worker.email }}</td>
-                            <td>
-                                {% if worker.whatsapp %}
-                                    <span class="text-green-600">✅ {{ worker.whatsapp }}</span>
-                                {% else %}
-                                    <span class="text-gray-400">Not set</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                {% if worker.login_sent %}
-                                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                        <i class="fas fa-check"></i> Sent
-                                    </span>
-                                {% else %}
-                                    <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
-                                        <i class="fas fa-clock"></i> Not sent
-                                    </span>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                {% if worker.whatsapp %}
-                                    <a href="{{ generate_whatsapp_login_link(worker) }}" target="_blank" 
-                                       class="text-green-500 hover:text-green-700 text-sm">
-                                        <i class="fab fa-whatsapp text-xl"></i>
-                                    </a>
-                                {% else %}
-                                    <span class="text-gray-300 text-sm">No number</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <div class="flex items-center justify-center gap-1">
-                                    {% if worker.whatsapp %}
-                                    <a href="{{ generate_whatsapp_login_link(worker) }}" target="_blank" 
-                                       class="btn btn-success btn-sm" title="Send login via WhatsApp">
-                                        <i class="fab fa-whatsapp"></i> Send
-                                    </a>
-                                    {% endif %}
-                                    <button onclick="editWorker('{{ worker.id }}')" class="btn btn-warning btn-sm">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button onclick="deleteWorker('{{ worker.id }}')" class="btn btn-danger btn-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="fas fa-inbox"></i>
-                                    <p>No workers found</p>
-                                    <div class="sub">Click "Add Worker" to create one</div>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="text-center py-12">
+                                <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-gray-500 font-medium">No workers found</p>
+                                <p class="text-sm text-gray-400">Click "Add Worker" to create one</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===== ADD/EDIT WORKER MODAL ===== -->
+<div id="addModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style="animation: modalSlideIn 0.3s ease-out;">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <h2 id="modalTitle" class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-user-plus text-indigo-500"></i> Add Worker
+            </h2>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6">
+            <form id="addForm">
+                <input type="hidden" id="workerId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="workerName" placeholder="e.g., John Doe" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email <span class="text-red-500">*</span></label>
+                    <input type="email" id="workerEmail" placeholder="worker@example.com" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">WhatsApp Number</label>
+                    <input type="text" id="workerWhatsapp" placeholder="e.g., 254712345678" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                    <p class="text-xs text-gray-400 mt-1">Format: 2547XXXXXXXX (Kenyan number without +)</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                    <input type="text" id="workerPassword" placeholder="Leave blank for auto-generated" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                    <p class="text-xs text-gray-400 mt-1">Leave blank to auto-generate a secure password</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Hourly Rate ($)</label>
+                    <input type="number" id="workerHourlyRate" step="0.5" value="10" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Worker Percentage (%)</label>
+                    <input type="number" id="workerPercentage" step="0.5" value="10" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
+                        <i class="fas fa-save"></i> Save Worker
+                    </button>
+                    <button type="button" onclick="closeModal()" class="px-5 py-3 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<!-- Add/Edit Worker Modal -->
-<div id="addModal" class="modal">
-    <div class="modal-content">
-        <h2 id="modalTitle"><i class="fas fa-user-plus text-blue-500 mr-2"></i>Add Worker</h2>
-        <form id="addForm">
-            <input type="hidden" id="workerId">
+<!-- ===== WHATSAPP MODAL ===== -->
+<div id="whatsappModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this) closeWhatsAppModal()">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style="animation: modalSlideIn 0.3s ease-out;">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fab fa-whatsapp text-green-500"></i> Send WhatsApp Messages
+            </h2>
+            <button onclick="closeWhatsAppModal()" class="text-gray-400 hover:text-gray-600 text-xl transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6">
+            <p class="text-sm text-gray-500 mb-4">Click each WhatsApp button below to open and send messages.</p>
             
-            <label>Full Name *</label>
-            <input type="text" id="workerName" placeholder="e.g., John Doe" required>
-
-            <label>Email *</label>
-            <input type="email" id="workerEmail" placeholder="worker@example.com" required>
-
-            <label>WhatsApp Number</label>
-            <input type="text" id="workerWhatsapp" placeholder="e.g., 254712345678">
-            <p class="text-xs text-gray-400 -mt-1 mb-3">Format: 2547XXXXXXXX (Kenyan number without +)</p>
-
-            <label>Password</label>
-            <input type="text" id="workerPassword" placeholder="Leave blank for auto-generated">
-            <p class="text-xs text-gray-400 -mt-1 mb-3">Leave blank to auto-generate a secure password</p>
-
-            <label>Hourly Rate ($)</label>
-            <input type="number" id="workerHourlyRate" step="0.5" value="10">
-
-            <label>Worker Percentage (%)</label>
-            <input type="number" id="workerPercentage" step="0.5" value="10">
-
-            <div class="flex gap-3 mt-2">
-                <button type="submit" class="btn btn-primary flex-1 justify-center">
-                    <i class="fas fa-save mr-2"></i> Save Worker
+            <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-2 bg-gray-50">
+                <div id="whatsappLinksContainer">
+                    <!-- Links will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-3 mt-4">
+                <button onclick="openAllWhatsApp()" id="openAllBtn" class="flex-1 bg-emerald-500 text-white py-2.5 rounded-xl font-semibold hover:bg-emerald-600 transition flex items-center justify-center gap-2">
+                    <i class="fab fa-whatsapp"></i> Open All (0)
                 </button>
-                <button type="button" onclick="closeModal()" class="btn btn-sm" style="background: #e2e8f0; color: #64748b;">
-                    Cancel
+                <button onclick="closeWhatsAppModal()" class="px-5 py-2.5 bg-gray-100 text-gray-600 rounded-xl font-medium hover:bg-gray-200 transition">
+                    Close
                 </button>
             </div>
-        </form>
+            <p class="text-xs text-gray-400 mt-2">
+                <i class="fas fa-info-circle"></i> 
+                Click "Open All" to open each WhatsApp chat. Your browser may ask for permission.
+            </p>
+        </div>
     </div>
 </div>
 
-<!-- WhatsApp Modal for Bulk Send - UPDATED -->
-<div id="whatsappModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-        <h2><i class="fab fa-whatsapp text-green-500 mr-2"></i>Send WhatsApp Messages</h2>
-        <p class="text-sm text-gray-500 mb-4">Click each WhatsApp button below to open and send messages.</p>
-        
-        <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-2 bg-gray-50">
-            <div id="whatsappLinksContainer">
-                <!-- Links will be inserted here -->
-            </div>
-        </div>
-        
-        <div class="flex flex-wrap gap-3 mt-4">
-            <button onclick="openAllWhatsApp()" id="openAllBtn" class="btn btn-success flex-1 justify-center">
-                <i class="fab fa-whatsapp mr-2"></i> Open All (0)
-            </button>
-            <button onclick="closeWhatsAppModal()" class="btn btn-sm" style="background: #e2e8f0; color: #64748b;">
-                Close
-            </button>
-        </div>
-        <p class="text-xs text-gray-400 mt-2">
-            <i class="fas fa-info-circle"></i> 
-            Click "Open All" to open each WhatsApp chat. Your browser may ask for permission.
-        </p>
-    </div>
-</div>
+<style>
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    .modal-open {
+        overflow: hidden;
+    }
+    .toast-notification {
+        animation: slide-in 0.3s ease-out;
+    }
+    @keyframes slide-in {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+</style>
 
 <script>
     let selectedWorkers = [];
@@ -250,7 +313,7 @@
     }
 
     // ============================================================
-    // WHATSAPP FUNCTIONS - FIXED
+    // WHATSAPP FUNCTIONS
     // ============================================================
     
     function sendBulkWhatsApp() {
@@ -286,8 +349,8 @@
                         <span class="text-sm font-medium text-gray-700">${name}</span>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-400 truncate max-w-[150px]">${link.substring(0, 50)}...</span>
-                            <a href="${link}" target="_blank" class="text-green-500 hover:text-green-700 px-3 py-1 rounded-lg bg-green-50 hover:bg-green-100 transition text-sm font-medium">
-                                <i class="fab fa-whatsapp mr-1"></i> Send
+                            <a href="${link}" target="_blank" class="px-3 py-1 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition text-xs font-medium flex items-center gap-1">
+                                <i class="fab fa-whatsapp"></i> Send
                             </a>
                         </div>
                     </div>
@@ -300,13 +363,10 @@
             return;
         }
         
-        // Update the button text with count
-        const openAllBtn = document.getElementById('openAllBtn');
-        if (openAllBtn) {
-            openAllBtn.innerHTML = `<i class="fab fa-whatsapp mr-2"></i> Open All (${validWorkers})`;
-        }
-        
-        document.getElementById('whatsappModal').classList.add('show');
+        document.getElementById('openAllBtn').innerHTML = `<i class="fab fa-whatsapp"></i> Open All (${validWorkers})`;
+        document.getElementById('whatsappModal').classList.remove('hidden');
+        document.getElementById('whatsappModal').style.display = 'flex';
+        document.body.classList.add('modal-open');
     }
 
     function openAllWhatsApp() {
@@ -315,18 +375,12 @@
             return;
         }
         
-        let opened = 0;
-        
-        // Open each WhatsApp link in a new tab with a delay
         selectedWorkers.forEach((worker, index) => {
             setTimeout(() => {
                 window.open(worker.link, '_blank');
-                opened++;
-                console.log(`✅ Opened WhatsApp for: ${worker.name}`);
-            }, index * 1000); // 1 second delay between each
+            }, index * 1000);
         });
         
-        // Close modal after all are opened
         const totalDelay = selectedWorkers.length * 1000 + 1500;
         setTimeout(() => {
             closeWhatsAppModal();
@@ -335,7 +389,9 @@
     }
 
     function closeWhatsAppModal() {
-        document.getElementById('whatsappModal').classList.remove('show');
+        document.getElementById('whatsappModal').classList.add('hidden');
+        document.getElementById('whatsappModal').style.display = 'none';
+        document.body.classList.remove('modal-open');
         selectedWorkers = [];
     }
 
@@ -355,11 +411,10 @@
             info: 'bg-blue-500'
         };
         
-        // Remove existing toasts
         document.querySelectorAll('.toast-notification').forEach(el => el.remove());
         
         const toast = document.createElement('div');
-        toast.className = `toast-notification fixed top-4 right-4 ${colors[type] || 'bg-slate-500'} text-white px-5 py-3.5 rounded-xl shadow-lg z-50 flex items-center gap-3 animate-slide-in max-w-md`;
+        toast.className = `toast-notification fixed top-4 right-4 ${colors[type] || 'bg-slate-500'} text-white px-5 py-3.5 rounded-xl shadow-lg z-50 flex items-center gap-3 max-w-md`;
         toast.innerHTML = `
             <span class="text-sm">${message}</span>
             <button onclick="this.parentElement.remove()" class="ml-4 hover:opacity-80">
@@ -375,17 +430,21 @@
     // ============================================================
     
     function openModal() {
-        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus text-blue-500 mr-2"></i>Add Worker';
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-user-plus text-indigo-500 mr-2"></i> Add Worker';
         document.getElementById('workerId').value = '';
         document.getElementById('addForm').reset();
         document.getElementById('workerPassword').value = '';
         document.getElementById('workerHourlyRate').value = 10;
         document.getElementById('workerPercentage').value = 10;
-        document.getElementById('addModal').classList.add('show');
+        document.getElementById('addModal').classList.remove('hidden');
+        document.getElementById('addModal').style.display = 'flex';
+        document.body.classList.add('modal-open');
     }
 
     function closeModal() {
-        document.getElementById('addModal').classList.remove('show');
+        document.getElementById('addModal').classList.add('hidden');
+        document.getElementById('addModal').style.display = 'none';
+        document.body.classList.remove('modal-open');
     }
 
     document.getElementById('addModal').addEventListener('click', function(e) {
@@ -399,7 +458,7 @@
             if (result.success) {
                 const worker = result.data.find(w => w.id === id);
                 if (worker) {
-                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-blue-500 mr-2"></i>Edit Worker';
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-indigo-500 mr-2"></i> Edit Worker';
                     document.getElementById('workerId').value = worker.id;
                     document.getElementById('workerName').value = worker.name || '';
                     document.getElementById('workerEmail').value = worker.email || '';
@@ -408,7 +467,9 @@
                     document.getElementById('workerPercentage').value = worker.worker_percentage || 10;
                     document.getElementById('workerPassword').value = '';
                     document.getElementById('workerPassword').placeholder = 'Leave blank to keep current';
-                    document.getElementById('addModal').classList.add('show');
+                    document.getElementById('addModal').classList.remove('hidden');
+                    document.getElementById('addModal').style.display = 'flex';
+                    document.body.classList.add('modal-open');
                 }
             }
         } catch (error) {
@@ -433,24 +494,34 @@
             data.password = password;
         }
 
-        const url = id ? '/api/workers' : '/api/workers';
         const method = id ? 'PUT' : 'POST';
         if (id) data.id = id;
 
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        submitBtn.disabled = true;
+
         try {
-            const res = await fetch(url, {
+            const res = await fetch('/api/workers', {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
             const result = await res.json();
+            
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            
             if (result.success) {
-                alert('✅ ' + result.message);
+                closeModal();
                 location.reload();
             } else {
                 alert('❌ Error: ' + result.error);
             }
         } catch (error) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
             alert('❌ Error: ' + error.message);
         }
     });
@@ -461,7 +532,6 @@
             const res = await fetch(`/api/workers?id=${id}`, { method: 'DELETE' });
             const result = await res.json();
             if (result.success) {
-                alert('✅ ' + result.message);
                 location.reload();
             } else {
                 alert('❌ Error: ' + result.error);
@@ -471,28 +541,10 @@
         }
     }
 
-    // ============================================================
-    // ANIMATION STYLES
-    // ============================================================
-    
-    // Add animation styles if not already present
-    if (!document.getElementById('toastStyles')) {
-        const style = document.createElement('style');
-        style.id = 'toastStyles';
-        style.textContent = `
-            @keyframes slide-in {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            .animate-slide-in {
-                animation: slide-in 0.3s ease-out;
-            }
-            .toast-notification {
-                animation: slide-in 0.3s ease-out;
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedCount();
+    });
 </script>
 
 {% endblock %}

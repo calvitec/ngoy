@@ -7,256 +7,240 @@
 
 {% block content %}
 
-<div class="flex justify-between items-center mb-4">
+<div class="flex justify-between items-center mb-4 flex-wrap gap-3">
     <div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-wrap">
             <span class="text-sm text-gray-500">Total: <strong>{{ accounts|length }}</strong> accounts</span>
             <span class="text-sm text-gray-500">|</span>
             <span class="text-sm text-gray-500">Proxies: <strong>{{ proxies|length }}</strong> available</span>
-            {% set used_proxies = 0 %}
-            {% for proxy in proxies %}
-                {% set used = false %}
-                {% for account in accounts %}
-                    {% if account.proxy_id == proxy.id %}
-                        {% set used = true %}
-                    {% endif %}
-                {% endfor %}
-                {% if used %}{% set used_proxies = used_proxies + 1 %}{% endif %}
-            {% endfor %}
             <span class="text-sm text-gray-500">|</span>
-            <span class="text-sm text-gray-500">Proxies used: <strong class="text-amber-600">{{ used_proxies }}</strong></span>
+            <span class="text-sm text-gray-500">Proxies used: <strong class="text-amber-600">{{ used_proxies|default(0) }}</strong></span>
             <span class="text-sm text-gray-500">|</span>
-            <span class="text-sm text-gray-500">Proxies free: <strong class="text-green-600">{{ proxies|length - used_proxies }}</strong></span>
+            <span class="text-sm text-gray-500">Proxies free: <strong class="text-green-600">{{ proxies|length - used_proxies|default(0) }}</strong></span>
         </div>
     </div>
-    <button onclick="openModal()" class="btn btn-primary">
+    <button onclick="openModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition flex items-center gap-2 text-sm font-medium shadow-lg shadow-indigo-200">
         <i class="fas fa-plus"></i> Add Account
     </button>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fas fa-list text-blue-500 mr-2"></i>All Accounts</h3>
-        <span class="text-sm text-gray-500">{{ accounts|length }} total</span>
+<div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-700"><i class="fas fa-list text-indigo-500 mr-2"></i>All Accounts</h3>
+        <span class="text-sm text-gray-400">{{ accounts|length }} total</span>
     </div>
-    <div class="card-body p-0">
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Platform</th>
-                        <th>Location</th>
-                        <th>Client Rate</th>
-                        <th>Proxy</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Name</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Platform</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Location</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Client Rate</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Proxy</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% if accounts %}
+                    {% for account in accounts %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ account.name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ account.platform or 'N/A' }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ account.location or 'N/A' }}</td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">${{ account.client_rate or 15 }}/hr</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if account.proxy_id %}
+                                {% for proxy in proxies %}
+                                    {% if proxy.id == account.proxy_id %}
+                                        <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-full flex items-center gap-1">
+                                            <i class="fas fa-network-wired text-[10px]"></i>
+                                            {{ proxy.ip }}
+                                        </span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-xs text-gray-400">None</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-xs font-medium px-2.5 py-1 rounded-full {% if account.status == 'active' %}bg-green-100 text-green-700{% else %}bg-gray-100 text-gray-500{% endif %}">
+                                {{ account.status or 'active' }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="editAccount('{{ account.id }}')" class="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition">
+                                    <i class="fas fa-edit text-xs"></i>
+                                </button>
+                                <button onclick="deleteAccount('{{ account.id }}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    {% if accounts %}
-                        {% for account in accounts %}
-                        <tr>
-                            <td class="font-medium">{{ account.name }}</td>
-                            <td>{{ account.platform or 'N/A' }}</td>
-                            <td>{{ account.location or 'N/A' }}</td>
-                            <td>
-                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
-                                    ${{ account.client_rate or 15 }}/hr
-                                </span>
-                            </td>
-                            <td>
-                                {% if account.proxy_id %}
-                                    {% for proxy in proxies %}
-                                        {% if proxy.id == account.proxy_id %}
-                                            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full flex items-center gap-1">
-                                                <i class="fas fa-network-wired text-[10px]"></i>
-                                                {{ proxy.ip }}
-                                            </span>
-                                        {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    <span class="text-xs text-gray-400">None</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="status-badge {% if account.status == 'active' %}status-active{% else %}status-inactive{% endif %}">
-                                    {{ account.status or 'active' }}
-                                </span>
-                            </td>
-                            <td>
-                                <button onclick="editAccount('{{ account.id }}')" class="btn btn-warning btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button onclick="deleteAccount('{{ account.id }}')" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="7">
-                                <div class="empty-state">
-                                    <i class="fas fa-inbox"></i>
-                                    <p>No accounts found</p>
-                                    <div class="sub">Click "Add Account" to create one</div>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="text-center py-12">
+                                <i class="fas fa-inbox text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-gray-500 font-medium">No accounts found</p>
+                                <p class="text-sm text-gray-400">Click "Add Account" to create one</p>
+                            </div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
     </div>
 </div>
 
-<!-- Add/Edit Account Modal -->
-<div id="addModal" class="modal">
-    <div class="modal-content" style="max-width: 550px;">
-        <div class="flex justify-between items-center mb-4">
-            <h2 id="modalTitle" class="text-xl font-bold text-gray-900">
-                <i class="fas fa-building text-blue-500 mr-2"></i>Add Account
+<!-- ===== ADD/EDIT ACCOUNT MODAL ===== -->
+<div id="addModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this) closeModal()">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style="animation: modalSlideIn 0.3s ease-out;">
+        <!-- Header -->
+        <div class="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+            <h2 id="modalTitle" class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <i class="fas fa-building text-indigo-500"></i> Add Account
             </h2>
-            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
-                <i class="fas fa-times text-xl"></i>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-xl transition">
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
-        <!-- Proxy Usage Info -->
-        <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
-            <div class="flex items-start gap-2">
-                <i class="fas fa-info-circle mt-0.5"></i>
-                <div>
-                    <p class="font-medium">Proxy Rules:</p>
-                    <ul class="text-xs mt-1 space-y-0.5 text-blue-600">
-                        <li>• <strong>One proxy = One account</strong> (A proxy cannot be shared between accounts)</li>
-                        <li>• <span class="text-red-600">🔴 Disabled proxies</span> are already assigned to other accounts</li>
-                        <li>• <span class="text-green-600">✅ Available proxies</span> are free to use</li>
-                    </ul>
+        <!-- Body -->
+        <div class="p-6">
+            <!-- Proxy Rules -->
+            <div class="mb-5 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <div class="flex items-start gap-2">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <div>
+                        <p class="text-sm font-medium text-blue-700">Proxy Rules:</p>
+                        <ul class="text-xs mt-1 space-y-0.5 text-blue-600">
+                            <li>• <strong>One proxy = One account</strong> (Cannot be shared)</li>
+                            <li>• <span class="text-red-600">🔴 Disabled</span> = Already assigned</li>
+                            <li>• <span class="text-green-600">✅ Available</span> = Free to use</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
+            <form id="addForm">
+                <input type="hidden" id="accountId">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Account Name <span class="text-red-500">*</span></label>
+                    <input type="text" id="accountName" placeholder="e.g., Client ABC" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Platform</label>
+                    <input type="text" id="accountPlatform" placeholder="e.g., Outlier" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Location</label>
+                    <input type="text" id="accountLocation" placeholder="e.g., USA-CA" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Client Rate ($/hr) <span class="text-red-500">*</span></label>
+                    <input type="number" id="clientRate" step="0.5" min="0" value="15" placeholder="e.g., 17.00" 
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none" required>
+                    <p class="text-xs text-gray-400 mt-1">What the client pays per hour</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Proxy</label>
+                    <select id="accountProxy" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                        <option value="">None</option>
+                        {% set used_proxy_ids = [] %}
+                        {% for account in accounts %}
+                            {% if account.proxy_id %}
+                                {% set used_proxy_ids = used_proxy_ids + [account.proxy_id] %}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% for proxy in proxies %}
+                            {% if proxy.id in used_proxy_ids %}
+                                <option value="{{ proxy.id }}" disabled class="text-gray-400">
+                                    🔴 {{ proxy.ip }} ({{ proxy.location }}) - Assigned
+                                </option>
+                            {% else %}
+                                <option value="{{ proxy.id }}" class="text-green-600">
+                                    ✅ {{ proxy.ip }} ({{ proxy.location }}) - Available
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div id="proxyWarning" class="hidden mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        This proxy is already assigned. Please select another.
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1.5">Status</label>
+                    <select id="accountStatus" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
+                    <i class="fas fa-save"></i> Save Account
+                </button>
+            </form>
         </div>
-
-        <form id="addForm">
-            <input type="hidden" id="accountId">
-            
-            <div class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Account Name *</label>
-                <input type="text" id="accountName" placeholder="e.g., Client ABC" 
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none" required>
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
-                <input type="text" id="accountPlatform" placeholder="e.g., Outlier" 
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <input type="text" id="accountLocation" placeholder="e.g., USA-CA" 
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Client Rate ($/hr) *</label>
-                <input type="number" id="clientRate" step="0.5" min="0" value="15" placeholder="e.g., 17.00" 
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none" required>
-                <p class="text-xs text-gray-400 mt-1">This is what the client pays per hour for this account</p>
-            </div>
-
-            <div class="mb-3">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Proxy</label>
-                <select id="accountProxy" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                    <option value="">None</option>
-                    {% set used_proxy_ids = [] %}
-                    {% for account in accounts %}
-                        {% if account.proxy_id %}
-                            {% set used_proxy_ids = used_proxy_ids + [account.proxy_id] %}
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% for proxy in proxies %}
-                        {% if proxy.id in used_proxy_ids %}
-                            <option value="{{ proxy.id }}" disabled class="text-gray-400 bg-red-50">
-                                🔴 {{ proxy.ip }} ({{ proxy.location }}) - Already assigned
-                            </option>
-                        {% else %}
-                            <option value="{{ proxy.id }}" class="text-green-700">
-                                ✅ {{ proxy.ip }} ({{ proxy.location }}) - Available
-                            </option>
-                        {% endif %}
-                    {% endfor %}
-                </select>
-                <p class="text-xs text-gray-400 mt-1">
-                    <span class="text-green-600">✅ Available</span> | 
-                    <span class="text-red-600">🔴 Already assigned</span>
-                </p>
-                <div id="proxyWarning" class="hidden mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <span>This proxy is already assigned to another account. Please select a different proxy.</span>
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select id="accountStatus" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
-            </div>
-
-            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-200">
-                <i class="fas fa-save"></i> Save Account
-            </button>
-        </form>
     </div>
 </div>
 
 <style>
-    .modal-content {
-        animation: modalSlideIn 0.25s ease-out;
-    }
     @keyframes modalSlideIn {
         from {
             opacity: 0;
-            transform: scale(0.95) translateY(10px);
+            transform: scale(0.95) translateY(20px);
         }
         to {
             opacity: 1;
             transform: scale(1) translateY(0);
         }
     }
+    .modal-open {
+        overflow: hidden;
+    }
     select option:disabled {
         color: #9ca3af;
-        background-color: #fef2f2;
     }
-    select option:not(:disabled):hover {
-        background-color: #eef2ff;
+    select option {
+        padding: 8px;
     }
 </style>
 
 <script>
-    let isEdit = false;
-    let usedProxies = [];
-
     function openModal() {
-        isEdit = false;
-        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-building text-blue-500 mr-2"></i>Add Account';
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-building text-indigo-500 mr-2"></i> Add Account';
         document.getElementById('accountId').value = '';
         document.getElementById('addForm').reset();
         document.getElementById('clientRate').value = 15;
         document.getElementById('proxyWarning').classList.add('hidden');
-        
-        // Reset proxy dropdown to show all available
         updateProxyDropdown();
-        
-        document.getElementById('addModal').classList.add('show');
+        document.getElementById('addModal').classList.remove('hidden');
+        document.getElementById('addModal').style.display = 'flex';
+        document.body.classList.add('modal-open');
     }
 
     function closeModal() {
-        document.getElementById('addModal').classList.remove('show');
+        document.getElementById('addModal').classList.add('hidden');
+        document.getElementById('addModal').style.display = 'none';
+        document.body.classList.remove('modal-open');
     }
 
     document.getElementById('addModal').addEventListener('click', function(e) {
@@ -265,9 +249,6 @@
 
     function updateProxyDropdown() {
         const select = document.getElementById('accountProxy');
-        const currentValue = select.value;
-        
-        // Get used proxy IDs
         const usedProxyIds = [];
         {% for account in accounts %}
             {% if account.proxy_id %}
@@ -275,11 +256,9 @@
             {% endif %}
         {% endfor %}
         
-        // If editing, exclude the current account's proxy from being marked as used
         const editId = document.getElementById('accountId').value;
         let currentProxyId = null;
         if (editId) {
-            // Find the current account's proxy
             {% for account in accounts %}
                 if ('{{ account.id }}' === editId) {
                     currentProxyId = '{{ account.proxy_id }}';
@@ -287,49 +266,31 @@
             {% endfor %}
         }
         
-        // Rebuild options
         const options = select.querySelectorAll('option');
         options.forEach(opt => {
-            if (opt.value === '') return; // Skip "None" option
-            
+            if (opt.value === '') return;
             const isUsed = usedProxyIds.includes(opt.value);
             const isCurrentProxy = (opt.value === currentProxyId);
             
             if (isUsed && !isCurrentProxy) {
                 opt.disabled = true;
-                opt.className = 'text-gray-400 bg-red-50';
-                opt.textContent = opt.textContent.replace(/^[✅🔴]\s*/, '') + ' 🔴 Already assigned';
-                if (!opt.textContent.includes('🔴')) {
-                    opt.textContent = '🔴 ' + opt.textContent;
-                }
+                opt.className = 'text-gray-400';
+                opt.textContent = opt.textContent.replace(/^[✅🔴]\s*/, '') + ' 🔴 Assigned';
             } else if (isCurrentProxy) {
                 opt.disabled = false;
-                opt.className = 'text-indigo-700 bg-blue-50';
-                opt.textContent = opt.textContent.replace(/^[✅🔴]\s*/, '') + ' ✅ Current proxy';
-                if (!opt.textContent.includes('✅')) {
-                    opt.textContent = '✅ ' + opt.textContent;
-                }
+                opt.className = 'text-indigo-600 font-medium';
+                opt.textContent = opt.textContent.replace(/^[✅🔴]\s*/, '') + ' ✅ Current';
             } else {
                 opt.disabled = false;
-                opt.className = 'text-green-700';
+                opt.className = 'text-green-600';
                 opt.textContent = opt.textContent.replace(/^[✅🔴]\s*/, '') + ' ✅ Available';
-                if (!opt.textContent.includes('✅')) {
-                    opt.textContent = '✅ ' + opt.textContent;
-                }
             }
         });
-        
-        // Restore selected value
-        if (currentValue) {
-            select.value = currentValue;
-        }
     }
 
-    // Check proxy selection on change
     document.getElementById('accountProxy').addEventListener('change', function() {
         const selected = this.value;
         const warning = document.getElementById('proxyWarning');
-        
         if (selected) {
             const option = this.options[this.selectedIndex];
             if (option.disabled) {
@@ -344,44 +305,39 @@
     });
 
     async function editAccount(id) {
-        isEdit = true;
         try {
             const response = await fetch('/api/accounts');
             const result = await response.json();
             if (result.success) {
                 const account = result.data.find(a => a.id === id);
                 if (account) {
-                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-blue-500 mr-2"></i>Edit Account';
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit text-indigo-500 mr-2"></i> Edit Account';
                     document.getElementById('accountId').value = account.id;
                     document.getElementById('accountName').value = account.name || '';
                     document.getElementById('accountPlatform').value = account.platform || '';
                     document.getElementById('accountLocation').value = account.location || '';
                     document.getElementById('clientRate').value = account.client_rate || 15;
                     document.getElementById('accountStatus').value = account.status || 'active';
-                    
-                    // Update proxy dropdown first
                     updateProxyDropdown();
-                    
-                    // Set the proxy value
                     document.getElementById('accountProxy').value = account.proxy_id || '';
-                    
-                    document.getElementById('addModal').classList.add('show');
+                    document.getElementById('addModal').classList.remove('hidden');
+                    document.getElementById('addModal').style.display = 'flex';
+                    document.body.classList.add('modal-open');
                 }
             }
         } catch (error) {
-            alert('❌ Error loading account data: ' + error.message);
+            alert('❌ Error loading account: ' + error.message);
         }
     }
 
     document.getElementById('addForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Check if selected proxy is already used
         const proxyId = document.getElementById('accountProxy').value;
         if (proxyId) {
             const option = document.getElementById('accountProxy').options[document.getElementById('accountProxy').selectedIndex];
             if (option.disabled) {
-                alert('❌ This proxy is already assigned to another account. Please select a different proxy.');
+                alert('❌ This proxy is already assigned. Please select another.');
                 document.getElementById('proxyWarning').classList.remove('hidden');
                 return;
             }
@@ -397,19 +353,15 @@
             status: document.getElementById('accountStatus').value
         };
 
-        // Validate name
         if (!data.name.trim()) {
             alert('❌ Account name is required');
             return;
         }
-
-        // Validate client rate
         if (!data.client_rate || data.client_rate <= 0) {
             alert('❌ Please enter a valid client rate');
             return;
         }
 
-        const url = id ? '/api/accounts' : '/api/accounts';
         const method = id ? 'PUT' : 'POST';
         if (id) data.id = id;
 
@@ -419,7 +371,7 @@
         submitBtn.disabled = true;
 
         try {
-            const res = await fetch(url, {
+            const res = await fetch('/api/accounts', {
                 method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -430,20 +382,8 @@
             submitBtn.disabled = false;
             
             if (result.success) {
-                // Show success message
-                const successMsg = document.createElement('div');
-                successMsg.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg z-50 flex items-center gap-3 animate-slide-in';
-                successMsg.innerHTML = `
-                    <i class="fas fa-check-circle text-xl"></i>
-                    <span>${result.message}</span>
-                    <button onclick="this.parentElement.remove()" class="ml-4 hover:opacity-80">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                document.body.appendChild(successMsg);
-                setTimeout(() => successMsg.remove(), 3000);
-                
-                setTimeout(() => location.reload(), 500);
+                closeModal();
+                location.reload();
             } else {
                 alert('❌ Error: ' + result.error);
             }
@@ -455,12 +395,11 @@
     });
 
     async function deleteAccount(id) {
-        if (!confirm('⚠️ Delete this account? This action cannot be undone.')) return;
+        if (!confirm('⚠️ Delete this account? This cannot be undone.')) return;
         try {
             const res = await fetch(`/api/accounts?id=${id}`, { method: 'DELETE' });
             const result = await res.json();
             if (result.success) {
-                alert('✅ ' + result.message);
                 location.reload();
             } else {
                 alert('❌ Error: ' + result.error);
@@ -470,20 +409,6 @@
         }
     }
 
-    // Add animation style
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slide-in {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .animate-slide-in {
-            animation: slide-in 0.3s ease-out;
-        }
-    `;
-    document.head.appendChild(style);
-
-    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateProxyDropdown();
     });
