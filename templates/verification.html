@@ -1,0 +1,636 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Verification - Hours vs Payment{% endblock %}
+
+{% block page_title %}Verification Dashboard{% endblock %}
+{% block page_subtitle %}Monitor worker hours, payments, and submission compliance{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================ -->
+<!-- STATS CARDS - Professional Grid -->
+<!-- ============================================================ -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">Total Workers</p>
+                <p class="text-2xl font-bold text-gray-800 mt-1">{{ total_workers|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-users text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-green-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">✅ Verified</p>
+                <p class="text-2xl font-bold text-green-600 mt-1">{{ matched_workers|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-blue-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">📅 On Track</p>
+                <p class="text-2xl font-bold text-blue-600 mt-1">{{ on_track_frequency|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-calendar-check text-blue-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-orange-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">⏳ Pending Payment</p>
+                <p class="text-2xl font-bold text-orange-600 mt-1">{{ pending_payment|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-clock text-orange-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-red-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">🚨 Fraud Alerts</p>
+                <p class="text-2xl font-bold text-red-600 mt-1">{{ fraud_alerts|default(0) }}</p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm border border-yellow-200 p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-sm text-gray-500 font-medium">⚠️ Issues</p>
+                <p class="text-2xl font-bold text-yellow-600 mt-1">{{ missing_hours|default(0) }}H / {{ missing_payment|default(0) }}P</p>
+            </div>
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <i class="fas fa-exclamation-circle text-yellow-600 text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- COMPLIANCE SUMMARY - Professional Cards -->
+<!-- ============================================================ -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-gradient-to-r from-green-50 to-white p-5 rounded-xl border border-green-200 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-check-circle text-green-600"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-green-800">📅 Daily Hours Compliance</p>
+                <p class="text-sm text-gray-600">{{ on_track_frequency|default(0) }} workers on track</p>
+                <p class="text-xs text-gray-400 mt-1">Submitting hours every 24 hours</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-gradient-to-r from-blue-50 to-white p-5 rounded-xl border border-blue-200 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-calendar-week text-blue-600"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-blue-800">📆 Weekly Payment Compliance</p>
+                <p class="text-sm text-gray-600">{{ (total_workers|default(0) - missing_payment|default(0) - pending_payment|default(0)) }} workers on track</p>
+                <p class="text-xs text-gray-400 mt-1">Submitting payment proof every 7 days</p>
+            </div>
+        </div>
+    </div>
+    <div class="bg-gradient-to-r from-amber-50 to-white p-5 rounded-xl border border-amber-200 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-exclamation-triangle text-amber-600"></i>
+            </div>
+            <div>
+                <p class="font-semibold text-amber-800">⚠️ Compliance Issues</p>
+                <p class="text-sm text-gray-600">{{ missing_hours|default(0) }} hours missing, {{ missing_payment|default(0) }} payments overdue</p>
+                <p class="text-xs text-gray-400 mt-1">Workers not meeting submission frequency</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PERFORMANCE GROUPS - Professional Tables -->
+<!-- ============================================================ -->
+
+<!-- ⭐ HIGH PERFORMERS -->
+{% if grouped_workers.high_performer %}
+<div class="card mb-6 border-l-4 border-green-500 shadow-sm">
+    <div class="card-header bg-gradient-to-r from-green-50 to-white py-3">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-star text-white text-sm"></i>
+            </div>
+            <h3 class="font-bold text-green-800">⭐ High Performers</h3>
+            <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">{{ grouped_workers.high_performer|length }} workers</span>
+            <span class="text-xs text-gray-400 ml-2">&gt; 12 hours total</span>
+        </div>
+    </div>
+    <div class="p-0 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rank</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diff</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for worker in grouped_workers.high_performer %}
+                <tr class="hover:bg-green-50 transition">
+                    <td class="px-4 py-3">
+                        {% if loop.index == 1 %}🥇
+                        {% elif loop.index == 2 %}🥈
+                        {% elif loop.index == 3 %}🥉
+                        {% else %}<span class="text-gray-400">#{{ loop.index }}</span>{% endif %}
+                    </td>
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ worker.worker_name }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ worker.account_name }}</td>
+                    <td class="px-4 py-3 font-bold text-purple-600">${{ worker.client_rate }}/hr</td>
+                    <td class="px-4 py-3 font-bold text-green-600">{{ worker.total_hours }}h</td>
+                    <td class="px-4 py-3 text-blue-600">${{ "%.2f"|format(worker.expected_payment) }}</td>
+                    <td class="px-4 py-3 text-emerald-600">${{ "%.2f"|format(worker.total_payment_amount) }}</td>
+                    <td class="px-4 py-3 {% if worker.payment_difference > 0 %}text-red-600{% elif worker.payment_difference < 0 %}text-green-600{% else %}text-gray-600{% endif %} font-medium">
+                        {% if worker.payment_difference > 0 %}+{% endif %}${{ "%.2f"|format(worker.payment_difference) }}
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                            {% if worker.verification_status == 'matched' %}bg-green-100 text-green-700
+                            {% elif worker.verification_status == 'payment_without_hours' %}bg-red-100 text-red-700
+                            {% elif worker.verification_status == 'hours_without_payment' %}bg-orange-100 text-orange-700
+                            {% elif worker.verification_status == 'overpaid' %}bg-yellow-100 text-yellow-700
+                            {% elif worker.verification_status == 'underpaid' %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            {{ worker.status_text }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewWorkerDetails('{{ worker.worker_id }}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ✅ GOOD WORKERS -->
+{% if grouped_workers.good_worker %}
+<div class="card mb-6 border-l-4 border-blue-500 shadow-sm">
+    <div class="card-header bg-gradient-to-r from-blue-50 to-white py-3">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-check text-white text-sm"></i>
+            </div>
+            <h3 class="font-bold text-blue-800">✅ Good Workers</h3>
+            <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">{{ grouped_workers.good_worker|length }} workers</span>
+            <span class="text-xs text-gray-400 ml-2">8-12 hours total</span>
+        </div>
+    </div>
+    <div class="p-0 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diff</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for worker in grouped_workers.good_worker %}
+                <tr class="hover:bg-blue-50 transition">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ worker.worker_name }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ worker.account_name }}</td>
+                    <td class="px-4 py-3 font-bold text-purple-600">${{ worker.client_rate }}/hr</td>
+                    <td class="px-4 py-3 font-bold text-blue-600">{{ worker.total_hours }}h</td>
+                    <td class="px-4 py-3 text-blue-600">${{ "%.2f"|format(worker.expected_payment) }}</td>
+                    <td class="px-4 py-3 text-emerald-600">${{ "%.2f"|format(worker.total_payment_amount) }}</td>
+                    <td class="px-4 py-3 {% if worker.payment_difference > 0 %}text-red-600{% elif worker.payment_difference < 0 %}text-green-600{% else %}text-gray-600{% endif %} font-medium">
+                        {% if worker.payment_difference > 0 %}+{% endif %}${{ "%.2f"|format(worker.payment_difference) }}
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                            {% if worker.verification_status == 'matched' %}bg-green-100 text-green-700
+                            {% elif worker.verification_status == 'payment_without_hours' %}bg-red-100 text-red-700
+                            {% elif worker.verification_status == 'hours_without_payment' %}bg-orange-100 text-orange-700
+                            {% elif worker.verification_status == 'overpaid' %}bg-yellow-100 text-yellow-700
+                            {% elif worker.verification_status == 'underpaid' %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            {{ worker.status_text }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewWorkerDetails('{{ worker.worker_id }}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ⚠️ NEEDS IMPROVEMENT -->
+{% if grouped_workers.needs_improvement %}
+<div class="card mb-6 border-l-4 border-yellow-500 shadow-sm">
+    <div class="card-header bg-gradient-to-r from-yellow-50 to-white py-3">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-exclamation text-white text-sm"></i>
+            </div>
+            <h3 class="font-bold text-yellow-800">⚠️ Needs Improvement</h3>
+            <span class="text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">{{ grouped_workers.needs_improvement|length }} workers</span>
+            <span class="text-xs text-gray-400 ml-2">&lt; 8 hours total</span>
+        </div>
+    </div>
+    <div class="p-0 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diff</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for worker in grouped_workers.needs_improvement %}
+                <tr class="hover:bg-yellow-50 transition">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ worker.worker_name }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ worker.account_name }}</td>
+                    <td class="px-4 py-3 font-bold text-purple-600">${{ worker.client_rate }}/hr</td>
+                    <td class="px-4 py-3 font-bold text-yellow-600">{{ worker.total_hours }}h</td>
+                    <td class="px-4 py-3 text-blue-600">${{ "%.2f"|format(worker.expected_payment) }}</td>
+                    <td class="px-4 py-3 text-emerald-600">${{ "%.2f"|format(worker.total_payment_amount) }}</td>
+                    <td class="px-4 py-3 {% if worker.payment_difference > 0 %}text-red-600{% elif worker.payment_difference < 0 %}text-green-600{% else %}text-gray-600{% endif %} font-medium">
+                        {% if worker.payment_difference > 0 %}+{% endif %}${{ "%.2f"|format(worker.payment_difference) }}
+                    </td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                            {% if worker.verification_status == 'matched' %}bg-green-100 text-green-700
+                            {% elif worker.verification_status == 'payment_without_hours' %}bg-red-100 text-red-700
+                            {% elif worker.verification_status == 'hours_without_payment' %}bg-orange-100 text-orange-700
+                            {% elif worker.verification_status == 'overpaid' %}bg-yellow-100 text-yellow-700
+                            {% elif worker.verification_status == 'underpaid' %}bg-orange-100 text-orange-700
+                            {% else %}bg-gray-100 text-gray-500{% endif %}">
+                            {{ worker.status_text }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewWorkerDetails('{{ worker.worker_id }}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- 🚫 NO HOURS -->
+{% if grouped_workers.no_hours %}
+<div class="card mb-6 border-l-4 border-gray-400 shadow-sm">
+    <div class="card-header bg-gradient-to-r from-gray-50 to-white py-3">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                <i class="fas fa-user-slash text-white text-sm"></i>
+            </div>
+            <h3 class="font-bold text-gray-700">🚫 No Hours Recorded</h3>
+            <span class="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full">{{ grouped_workers.no_hours|length }} workers</span>
+        </div>
+    </div>
+    <div class="p-0 overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for worker in grouped_workers.no_hours %}
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-4 py-3 font-medium text-gray-800">{{ worker.worker_name }}</td>
+                    <td class="px-4 py-3 text-gray-600">{{ worker.account_name }}</td>
+                    <td class="px-4 py-3 font-bold text-purple-600">${{ worker.client_rate }}/hr</td>
+                    <td class="px-4 py-3 font-bold text-gray-400">0h</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                            {{ worker.status_text }}
+                        </span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <button onclick="viewWorkerDetails('{{ worker.worker_id }}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- ============================================================ -->
+<!-- ALL WORKERS SUMMARY - Expandable -->
+<!-- ============================================================ -->
+<div class="card shadow-sm">
+    <div class="card-header cursor-pointer py-3 px-6 hover:bg-gray-50 transition" onclick="toggleAllWorkers()">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                    <i class="fas fa-users text-white text-sm"></i>
+                </div>
+                <h3 class="font-bold text-gray-800">All Workers Summary</h3>
+                <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">{{ workers|length }} total</span>
+            </div>
+            <span id="toggleIcon" class="text-gray-400 text-xl">
+                <i class="fas fa-chevron-down"></i>
+            </span>
+        </div>
+    </div>
+    <div id="allWorkersTable" class="hidden">
+        <div class="p-0 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diff</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% set sorted_workers = workers|sort(attribute='total_hours', reverse=true) %}
+                    {% for worker in sorted_workers %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 font-medium text-gray-500">
+                            {% if loop.index == 1 %}🥇
+                            {% elif loop.index == 2 %}🥈
+                            {% elif loop.index == 3 %}🥉
+                            {% else %}{{ loop.index }}{% endif %}
+                        </td>
+                        <td class="px-4 py-3 font-medium text-gray-800">{{ worker.worker_name }}</td>
+                        <td class="px-4 py-3 text-gray-600">{{ worker.account_name }}</td>
+                        <td class="px-4 py-3 font-bold text-purple-600">${{ worker.client_rate }}/hr</td>
+                        <td class="px-4 py-3 font-bold text-gray-700">{{ worker.total_hours }}h</td>
+                        <td class="px-4 py-3 text-blue-600">${{ "%.2f"|format(worker.expected_payment) }}</td>
+                        <td class="px-4 py-3 text-emerald-600">${{ "%.2f"|format(worker.total_payment_amount) }}</td>
+                        <td class="px-4 py-3 {% if worker.payment_difference > 0 %}text-red-600{% elif worker.payment_difference < 0 %}text-green-600{% else %}text-gray-600{% endif %} font-medium">
+                            {% if worker.payment_difference > 0 %}+{% endif %}${{ "%.2f"|format(worker.payment_difference) }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium
+                                {% if worker.verification_status == 'matched' %}bg-green-100 text-green-700
+                                {% elif worker.verification_status == 'payment_without_hours' %}bg-red-100 text-red-700
+                                {% elif worker.verification_status == 'hours_without_payment' %}bg-orange-100 text-orange-700
+                                {% elif worker.verification_status == 'overpaid' %}bg-yellow-100 text-yellow-700
+                                {% elif worker.verification_status == 'underpaid' %}bg-orange-100 text-orange-700
+                                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                                {{ worker.status_text }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <button onclick="viewWorkerDetails('{{ worker.worker_id }}')" class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                                <i class="fas fa-eye mr-1"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- DETAIL MODAL -->
+<!-- ============================================================ -->
+<div id="detailModal" class="modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; border-radius: 20px; max-width: 800px; width: 95%; padding: 35px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fas fa-user-circle text-blue-500 text-3xl"></i>
+                <span id="detailWorkerName">-</span>
+            </h2>
+            <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600 text-3xl hover:rotate-90 transition">&times;</button>
+        </div>
+        
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div class="bg-blue-50 p-4 rounded-xl text-center border border-blue-100">
+                <p class="text-xs text-gray-500 font-medium">Account</p>
+                <p class="text-lg font-bold text-blue-600 mt-1" id="detailAccount">-</p>
+            </div>
+            <div class="bg-purple-50 p-4 rounded-xl text-center border border-purple-100">
+                <p class="text-xs text-gray-500 font-medium">Rate</p>
+                <p class="text-xl font-bold text-purple-600 mt-1" id="detailRate">-</p>
+            </div>
+            <div class="bg-green-50 p-4 rounded-xl text-center border border-green-100">
+                <p class="text-xs text-gray-500 font-medium">Hours</p>
+                <p class="text-xl font-bold text-green-600 mt-1" id="detailTotalHours">-</p>
+            </div>
+            <div class="bg-amber-50 p-4 rounded-xl text-center border border-amber-100">
+                <p class="text-xs text-gray-500 font-medium">Expected</p>
+                <p class="text-xl font-bold text-amber-600 mt-1" id="detailExpectedPayment">-</p>
+            </div>
+            <div class="bg-red-50 p-4 rounded-xl text-center border border-red-100">
+                <p class="text-xs text-gray-500 font-medium">Difference</p>
+                <p class="text-xl font-bold text-red-600 mt-1" id="detailDifference">-</p>
+            </div>
+        </div>
+
+        <!-- Frequency Info -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-100">
+                <p class="text-xs text-gray-500">📅 Last Hours Submission</p>
+                <p class="font-bold text-gray-800 mt-1" id="detailLastHours">-</p>
+            </div>
+            <div class="bg-gray-50 p-3 rounded-xl text-center border border-gray-100">
+                <p class="text-xs text-gray-500">📆 Last Payment Proof</p>
+                <p class="font-bold text-gray-800 mt-1" id="detailLastPayment">-</p>
+            </div>
+        </div>
+
+        <!-- Formula Display -->
+        <div class="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4 mb-6 border border-gray-200">
+            <p class="text-sm text-gray-700">
+                <span class="font-bold text-gray-900">📊 Calculation:</span>
+                <span id="detailFormula" class="text-gray-600">-</span>
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Hours Submissions -->
+            <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <i class="fas fa-clock text-blue-500"></i> Hours Submissions
+                </h4>
+                <div id="detailHoursList" class="space-y-1 max-h-48 overflow-y-auto">
+                    <p class="text-gray-400 text-sm">No hours submissions</p>
+                </div>
+            </div>
+            
+            <!-- Payment Proofs -->
+            <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <i class="fas fa-receipt text-green-500"></i> Payment Proofs
+                </h4>
+                <div id="detailPaymentsList" class="space-y-1 max-h-48 overflow-y-auto">
+                    <p class="text-gray-400 text-sm">No payment proofs</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
+            <button onclick="closeDetailModal()" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition font-medium">
+                <i class="fas fa-times mr-2"></i> Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SCRIPTS -->
+<!-- ============================================================ -->
+<script>
+    function toggleAllWorkers() {
+        const table = document.getElementById('allWorkersTable');
+        const icon = document.getElementById('toggleIcon');
+        if (table.classList.contains('hidden')) {
+            table.classList.remove('hidden');
+            icon.innerHTML = '<i class="fas fa-chevron-up"></i>';
+        } else {
+            table.classList.add('hidden');
+            icon.innerHTML = '<i class="fas fa-chevron-down"></i>';
+        }
+    }
+    
+    const workersData = {{ workers|tojson|safe }};
+    
+    function viewWorkerDetails(workerId) {
+        const worker = workersData.find(w => w.worker_id === workerId);
+        if (!worker) return;
+        
+        document.getElementById('detailWorkerName').textContent = worker.worker_name;
+        document.getElementById('detailAccount').textContent = worker.account_name || 'N/A';
+        document.getElementById('detailRate').textContent = '$' + worker.client_rate + '/hr';
+        document.getElementById('detailTotalHours').textContent = worker.total_hours + 'h';
+        document.getElementById('detailExpectedPayment').textContent = '$' + worker.expected_payment.toFixed(2);
+        
+        const diffElement = document.getElementById('detailDifference');
+        const diff = worker.payment_difference;
+        if (diff > 0) {
+            diffElement.textContent = '+$' + diff.toFixed(2);
+            diffElement.className = 'text-xl font-bold text-red-600 mt-1';
+        } else if (diff < 0) {
+            diffElement.textContent = '-$' + Math.abs(diff).toFixed(2);
+            diffElement.className = 'text-xl font-bold text-green-600 mt-1';
+        } else {
+            diffElement.textContent = '$0.00';
+            diffElement.className = 'text-xl font-bold text-gray-600 mt-1';
+        }
+        
+        document.getElementById('detailLastHours').textContent = worker.last_hours_submission || 'Never';
+        document.getElementById('detailLastPayment').textContent = worker.last_payment_submission || 'Never';
+        document.getElementById('detailFormula').textContent = 
+            `${worker.total_hours} hours × $${worker.client_rate}/hr = $${worker.expected_payment.toFixed(2)} expected | Actual: $${worker.total_payment_amount.toFixed(2)} | Diff: $${worker.payment_difference.toFixed(2)}`;
+        
+        const hoursList = document.getElementById('detailHoursList');
+        if (worker.hours_submissions && worker.hours_submissions.length > 0) {
+            hoursList.innerHTML = worker.hours_submissions.map(h => `
+                <div class="flex justify-between items-center text-sm bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                    <span class="text-gray-600">${h.date || 'N/A'}</span>
+                    <span class="font-medium text-blue-600">${h.hours}h</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full 
+                        ${h.status === 'approved' ? 'bg-green-100 text-green-700' : 
+                          h.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                          'bg-red-100 text-red-700'}">
+                        ${h.status || 'pending'}
+                    </span>
+                </div>
+            `).join('');
+        } else {
+            hoursList.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No hours submissions</p>';
+        }
+        
+        const paymentsList = document.getElementById('detailPaymentsList');
+        if (worker.payment_submissions && worker.payment_submissions.length > 0) {
+            paymentsList.innerHTML = worker.payment_submissions.map(p => `
+                <div class="flex justify-between items-center text-sm bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
+                    <span class="text-gray-600">${p.date || 'N/A'}</span>
+                    <span class="font-medium text-green-600">$${p.amount.toFixed(2)}</span>
+                    ${p.screenshot ? `<a href="${p.screenshot}" target="_blank" class="text-blue-500 hover:text-blue-700"><i class="fas fa-image"></i></a>` : ''}
+                    <span class="text-xs px-2 py-0.5 rounded-full 
+                        ${p.status === 'paid' ? 'bg-green-100 text-green-700' : 
+                          p.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                          'bg-red-100 text-red-700'}">
+                        ${p.status || 'pending'}
+                    </span>
+                </div>
+            `).join('');
+        } else {
+            paymentsList.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">No payment proofs</p>';
+        }
+        
+        document.getElementById('detailModal').style.display = 'flex';
+    }
+    
+    function closeDetailModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+    
+    document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetailModal();
+    });
+</script>
+
+{% endblock %}
