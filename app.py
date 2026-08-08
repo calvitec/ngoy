@@ -3606,6 +3606,188 @@ def api_mark_all_announcements_read():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+        # ============================================================
+# ADMIN MESSAGES - Real-time Chat
+# ============================================================
+
+@app.route('/admin-messages')
+@login_required
+@admin_required
+def admin_messages():
+    """Admin messages page with real-time chat"""
+    try:
+        user_id = session.get('user_id')
+        user_name = session.get('user_name', 'Admin')
+        user_email = session.get('user_email', 'admin@handshake.com')
+        
+        print("=" * 60)
+        print("📬 ADMIN MESSAGES PAGE LOADED")
+        print(f"👤 Admin: {user_name} ({user_id})")
+        print("=" * 60)
+        
+        # Get all users (except current admin)
+        users_response = supabase_request('GET', 'hs_users')
+        all_users = users_response['data'] if users_response['data'] else []
+        
+        # Filter out current user
+        filtered_users = [u for u in all_users if u.get('id') != user_id]
+        
+        print(f"👥 Found {len(filtered_users)} other users")
+        
+        # Get all announcements/messages
+        announcements_response = supabase_request('GET', 'hs_announcements')
+        all_announcements = announcements_response['data'] if announcements_response['data'] else []
+        
+        # Process messages for display
+        processed_messages = []
+        for msg in all_announcements:
+            try:
+                # Parse read_by
+                read_by = msg.get('read_by', '[]')
+                if isinstance(read_by, str):
+                    read_by = json.loads(read_by) if read_by else []
+                elif not isinstance(read_by, list):
+                    read_by = []
+                
+                # Parse target_users
+                target_users = msg.get('target_users', '[]')
+                if isinstance(target_users, str):
+                    target_users = json.loads(target_users) if target_users else []
+                elif not isinstance(target_users, list):
+                    target_users = []
+                
+                processed_messages.append({
+                    'id': msg.get('id'),
+                    'sender_id': msg.get('created_by') or msg.get('sender_id'),
+                    'sender_name': msg.get('created_by_name') or msg.get('sender_name', 'Unknown'),
+                    'sender_role': msg.get('created_by_role') or msg.get('sender_role', 'User'),
+                    'message': msg.get('message') or msg.get('content', ''),
+                    'title': msg.get('title', ''),
+                    'audience': msg.get('audience', 'all'),
+                    'target_users': target_users,
+                    'read_by': read_by,
+                    'created_at': msg.get('created_at', datetime.utcnow().isoformat()),
+                    'priority': msg.get('priority', 'normal')
+                })
+            except Exception as e:
+                print(f"⚠️ Error processing message: {e}")
+                continue
+        
+        print(f"📊 Found {len(processed_messages)} total messages")
+        
+        # Get stats
+        stats = get_handshake_stats()
+        
+        return render_template('admin_messages.html',
+            users=filtered_users,
+            announcements=processed_messages,
+            current_user_id=user_id,
+            current_user_role='admin',
+            user_name=user_name,
+            user_email=user_email,
+            now=datetime.now(),
+            stats=stats
+        )
+        
+    except Exception as e:
+        print(f"❌ Error loading admin messages: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash('Error loading messages', 'danger')
+        return redirect(url_for('admin_dashboard'))
+
+
+# ============================================================
+# WORKER MESSAGES - Real-time Chat
+# ============================================================
+
+@app.route('/worker-messages')
+@login_required
+def worker_messages():
+    """Worker messages page with real-time chat"""
+    try:
+        user_id = session.get('user_id')
+        user_name = session.get('user_name', 'Worker')
+        user_email = session.get('user_email', 'worker@handshake.com')
+        user_role = session.get('user_role', 'worker')
+        
+        print("=" * 60)
+        print("📬 WORKER MESSAGES PAGE LOADED")
+        print(f"👤 Worker: {user_name} ({user_id})")
+        print("=" * 60)
+        
+        # Get all users (except current worker)
+        users_response = supabase_request('GET', 'hs_users')
+        all_users = users_response['data'] if users_response['data'] else []
+        
+        # Filter out current user
+        filtered_users = [u for u in all_users if u.get('id') != user_id]
+        
+        print(f"👥 Found {len(filtered_users)} other users")
+        
+        # Get all announcements/messages
+        announcements_response = supabase_request('GET', 'hs_announcements')
+        all_announcements = announcements_response['data'] if announcements_response['data'] else []
+        
+        # Process messages for display
+        processed_messages = []
+        for msg in all_announcements:
+            try:
+                # Parse read_by
+                read_by = msg.get('read_by', '[]')
+                if isinstance(read_by, str):
+                    read_by = json.loads(read_by) if read_by else []
+                elif not isinstance(read_by, list):
+                    read_by = []
+                
+                # Parse target_users
+                target_users = msg.get('target_users', '[]')
+                if isinstance(target_users, str):
+                    target_users = json.loads(target_users) if target_users else []
+                elif not isinstance(target_users, list):
+                    target_users = []
+                
+                processed_messages.append({
+                    'id': msg.get('id'),
+                    'sender_id': msg.get('created_by') or msg.get('sender_id'),
+                    'sender_name': msg.get('created_by_name') or msg.get('sender_name', 'Unknown'),
+                    'sender_role': msg.get('created_by_role') or msg.get('sender_role', 'User'),
+                    'message': msg.get('message') or msg.get('content', ''),
+                    'title': msg.get('title', ''),
+                    'audience': msg.get('audience', 'all'),
+                    'target_users': target_users,
+                    'read_by': read_by,
+                    'created_at': msg.get('created_at', datetime.utcnow().isoformat()),
+                    'priority': msg.get('priority', 'normal')
+                })
+            except Exception as e:
+                print(f"⚠️ Error processing message: {e}")
+                continue
+        
+        print(f"📊 Found {len(processed_messages)} total messages")
+        
+        # Get stats
+        stats = get_handshake_stats()
+        
+        return render_template('worker_messages.html',
+            users=filtered_users,
+            announcements=processed_messages,
+            current_user_id=user_id,
+            current_user_role=user_role,
+            user_name=user_name,
+            user_email=user_email,
+            now=datetime.now(),
+            stats=stats
+        )
+        
+    except Exception as e:
+        print(f"❌ Error loading worker messages: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        flash('Error loading messages', 'danger')
+        return redirect(url_for('worker_dashboard'))
 # ============================================================
 # RUN APP
 # ============================================================
