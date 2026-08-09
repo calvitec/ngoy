@@ -83,6 +83,45 @@
         .btn-sm { padding: 4px 10px; font-size: 12px; }
         .btn-secondary { background: #e5e7eb; color: #374151; }
         .btn-secondary:hover { background: #d1d5db; }
+        
+        /* WhatsApp-style message bubbles */
+        .message-bubble.sent {
+            background: #6366f1;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .message-bubble.received {
+            background: white;
+            color: #0f172a;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .message-bubble.sent.single { border-radius: 14px 4px 14px 14px; }
+        .message-bubble.sent.first { border-radius: 14px 4px 4px 14px; }
+        .message-bubble.sent.middle { border-radius: 4px 4px 4px 14px; }
+        .message-bubble.sent.last { border-radius: 14px 4px 14px 14px; }
+        .message-bubble.received.single { border-radius: 4px 14px 14px 14px; }
+        .message-bubble.received.first { border-radius: 4px 14px 14px 4px; }
+        .message-bubble.received.middle { border-radius: 4px 14px 4px 4px; }
+        .message-bubble.received.last { border-radius: 4px 14px 14px 14px; }
+        
+        .sender-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 2px;
+            padding-left: 4px;
+        }
+        
+        .message-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            max-width: 80%;
+            margin-bottom: 4px;
+        }
+        .message-group.sent { align-self: flex-end; align-items: flex-end; }
+        .message-group.received { align-self: flex-start; align-items: flex-start; }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -142,7 +181,7 @@
         
         <div class="sidebar-divider border-t my-3"></div>
         
-        <!-- 🔥 CHANGED: Announcements → Messages -->
+        <!-- Messages -->
         <a href="/admin-messages" class="sidebar-link flex items-center gap-3 px-4 py-2.5 text-sm {% if request.endpoint == 'admin_messages' %}active{% endif %}">
             <i class="fas fa-comments w-5 text-center"></i> Messages
             {% if stats and stats.unread_announcements|default(0) > 0 %}
