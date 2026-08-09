@@ -1950,16 +1950,14 @@ def api_accounts():
             return jsonify({'success': False, 'error': 'Message is required'}), 400
         
         # ============================================================
-        # 🔥🔥🔥 FIX: FORCE ADMIN PERMISSIONS
+        # 🔥🔥🔥 FORCE ADMIN PERMISSIONS
         # ============================================================
-        # Check if this is the admin user by email
         admin_emails = ['admin@handshake.com', 'admin@example.com']
         if user_email in admin_emails:
             user_role = 'admin'
-            session['user_role'] = 'admin'  # Update session
-            print(f"✅✅✅ Forced admin role for: {user_email}")
+            session['user_role'] = 'admin'
         
-        # Also check if user_id is the admin user from database
+        # Also check database
         if user_id:
             try:
                 user_check = supabase_request('GET', 'hs_users', filters={'id': user_id})
@@ -1968,16 +1966,23 @@ def api_accounts():
                     if db_user.get('role') == 'admin':
                         user_role = 'admin'
                         session['user_role'] = 'admin'
-                        print(f"✅✅✅ Admin role confirmed from database")
             except:
                 pass
         
-        print(f"📤 Final user_role: {user_role}")
+        print(f"✅ User: {user_name} ({user_role}) - {user_email}")
         
         # ============================================================
-        # 🔥 RECIPIENT MAPPING
+        # 🔥 RECIPIENT MAPPING - ACCEPT BOTH FORMATS
         # ============================================================
         recipient_type = data.get('recipient_type', 'all_users')
+        
+        # 🔥 FIX: Accept both formats
+        if recipient_type == 'workers':
+            recipient_type = 'all_workers'
+        elif recipient_type == 'admins':
+            recipient_type = 'all_admins'
+        elif recipient_type == 'all':
+            recipient_type = 'all_users'
         
         # ============================================================
         # 🔥 PERMISSION CHECK
@@ -2012,8 +2017,6 @@ def api_accounts():
         }
         audience = audience_map.get(recipient_type, 'all')
         
-        print(f"📤 User: {user_name} ({user_role}) sending to: {recipient_type}")
-        
         # ============================================================
         # 🔥 GET TARGET USERS
         # ============================================================
@@ -2024,7 +2027,6 @@ def api_accounts():
                 users_response = supabase_request('GET', 'hs_users', filters={'role': 'worker'})
                 if users_response['data']:
                     target_users = [u['id'] for u in users_response['data']]
-                    print(f"📤 Target: {len(target_users)} workers")
             except Exception as e:
                 print(f"⚠️ Error getting workers: {e}")
                 
@@ -2033,7 +2035,6 @@ def api_accounts():
                 users_response = supabase_request('GET', 'hs_users', filters={'role': 'admin'})
                 if users_response['data']:
                     target_users = [u['id'] for u in users_response['data']]
-                    print(f"📤 Target: {len(target_users)} admins")
             except Exception as e:
                 print(f"⚠️ Error getting admins: {e}")
                 
@@ -2042,7 +2043,6 @@ def api_accounts():
                 users_response = supabase_request('GET', 'hs_users')
                 if users_response['data']:
                     target_users = [u['id'] for u in users_response['data']]
-                    print(f"📤 Target: {len(target_users)} all users")
             except Exception as e:
                 print(f"⚠️ Error getting all users: {e}")
                 
@@ -2050,7 +2050,6 @@ def api_accounts():
             recipient_id = data.get('recipient_id')
             if recipient_id:
                 target_users = [recipient_id]
-                print(f"📤 Target: 1 specific user ({recipient_id})")
         
         # ============================================================
         # 🔥 BUILD ANNOUNCEMENT DATA
@@ -2069,10 +2068,6 @@ def api_accounts():
             'created_at': datetime.utcnow().isoformat(),
             'updated_at': datetime.utcnow().isoformat()
         }
-        
-        print(f"📤 Creating announcement: {announcement_data['title']}")
-        print(f"📤 Audience: {announcement_data['audience']}")
-        print(f"📤 Target users: {len(target_users)}")
         
         result = supabase_request('POST', 'hs_announcements', data=announcement_data)
         
