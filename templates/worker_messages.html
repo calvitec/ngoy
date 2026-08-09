@@ -654,12 +654,13 @@ let currentUserName = '{{ user_name|default("Worker") }}';
 let realtimeChannel = null;
 
 // ============================================================
-// 📋 LOAD MESSAGES - FIXED WITH PROPER GROUPING
+// 📋 LOAD MESSAGES - FIXED WITH PROPER SORTING
 // ============================================================
 function loadMessages(contactId) {
     const container = document.getElementById('chatMessages');
     let messages = [];
     
+    // Filter messages for this contact
     if (contactId === 'group') {
         messages = allMessages.filter(m => {
             const audience = m.audience || '';
@@ -680,7 +681,7 @@ function loadMessages(contactId) {
         });
     }
     
-    // 🔥 IMPORTANT: Sort by created_at (oldest first for proper threading)
+    // 🔥🔥🔥 CRITICAL FIX: Sort by created_at (oldest first)
     messages.sort((a, b) => {
         const dateA = new Date(a.created_at || 0);
         const dateB = new Date(b.created_at || 0);
@@ -704,7 +705,7 @@ function loadMessages(contactId) {
     let messageGroup = null;
     let groupedMessages = [];
     
-    // 🔥 Group messages by date and sender
+    // Group messages by date and sender
     messages.forEach((msg) => {
         const msgDate = msg.created_at ? msg.created_at.substring(0, 10) : '';
         const senderId = msg.sender_id || 'unknown';
@@ -751,7 +752,7 @@ function loadMessages(contactId) {
         groupedMessages.push(messageGroup);
     }
     
-    // 🔥 Render grouped messages in order
+    // Render grouped messages in order
     groupedMessages.forEach((group) => {
         const isSent = group.isSent;
         
@@ -982,6 +983,13 @@ function setupRealtime() {
                     if (!exists) {
                         console.log('✅ Adding message to UI!');
                         allMessages.push(normalizedMsg);
+                        
+                        // 🔥 CRITICAL: Sort after adding new message
+                        allMessages.sort((a, b) => {
+                            const dateA = new Date(a.created_at || 0);
+                            const dateB = new Date(b.created_at || 0);
+                            return dateA - dateB;
+                        });
                         
                         // 🔥 FORCE UI UPDATE
                         loadMessages(currentContact);
