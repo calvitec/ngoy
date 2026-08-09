@@ -1,4 +1,4 @@
-{% extends "admin_base.html" %}
+{% extends "worker_base.html" %}
 
 {% block title %}Messages - Handshake Manager{% endblock %}
 
@@ -519,7 +519,7 @@
 
 {% block content %}
 <!-- ============================================================
-     ADMIN MESSAGES
+     WORKER MESSAGES
      ============================================================ -->
 <div class="chat-container" id="chatContainer">
     
@@ -650,17 +650,35 @@ let currentContact = 'group';
 let allMessages = {{ announcements|tojson }};
 let allUsers = {{ users|tojson }};
 let currentUserId = '{{ current_user_id }}';
-let currentUserName = '{{ user_name|default("Admin") }}';
+let currentUserName = '{{ user_name|default("Worker") }}';
 let realtimeChannel = null;
 
 // ============================================================
-// 📋 LOAD MESSAGES - FINAL FIXED VERSION
+// 🛠️ HELPER: Sort Messages Function
+// ============================================================
+function sortMessages(messages) {
+    return messages.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        if (dateA - dateB !== 0) {
+            return dateA - dateB;
+        }
+        return (a.id || '').localeCompare(b.id || '');
+    });
+}
+
+// ============================================================
+// 📋 LOAD MESSAGES - GUARANTEED FIXED VERSION
 // ============================================================
 function loadMessages(contactId) {
     const container = document.getElementById('chatMessages');
+    
+    // 🔥🔥🔥 STEP 1: SORT THE GLOBAL allMessages ARRAY FIRST
+    sortMessages(allMessages);
+    
+    // 🔥 STEP 2: Now filter from the SORTED array
     let messages = [];
     
-    // Filter messages for this contact
     if (contactId === 'group') {
         messages = allMessages.filter(m => {
             const audience = m.audience || '';
@@ -680,20 +698,6 @@ function loadMessages(contactId) {
             return isFromContact || isToContact || isToAll || isFromMeToContact;
         });
     }
-    
-    // 🔥🔥🔥 FINAL FIX: Sort by created_at, then by id
-    messages.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        
-        // If timestamps are different, sort by time
-        if (dateA - dateB !== 0) {
-            return dateA - dateB;
-        }
-        
-        // If timestamps are the same, sort by id
-        return (a.id || '').localeCompare(b.id || '');
-    });
     
     if (messages.length === 0) {
         container.innerHTML = `
@@ -718,7 +722,6 @@ function loadMessages(contactId) {
         const senderId = msg.sender_id || 'unknown';
         const isSent = senderId === currentUserId;
         
-        // Check if this is a new date
         if (msgDate !== currentDate) {
             if (messageGroup) {
                 groupedMessages.push(messageGroup);
@@ -734,7 +737,6 @@ function loadMessages(contactId) {
             lastSenderId = null;
         }
         
-        // Check if this is a new sender
         if (senderId !== lastSenderId) {
             if (messageGroup) {
                 groupedMessages.push(messageGroup);
@@ -759,11 +761,9 @@ function loadMessages(contactId) {
         groupedMessages.push(messageGroup);
     }
     
-    // Render grouped messages in order
     groupedMessages.forEach((group) => {
         const isSent = group.isSent;
         
-        // Show sender name for received messages
         if (!isSent) {
             html += `<div class="sender-label">${group.senderName}</div>`;
         }
@@ -931,7 +931,7 @@ function searchContacts() {
 }
 
 // ============================================================
-// 🔔 SUPABASE REAL-TIME LISTENER - FINAL FIXED VERSION
+// 🔔 SUPABASE REAL-TIME LISTENER - GUARANTEED FIXED
 // ============================================================
 function setupRealtime() {
     console.log('🔌 Setting up real-time listener...');
@@ -939,7 +939,7 @@ function setupRealtime() {
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     realtimeChannel = sb
-        .channel('admin-messages-' + currentUserId)
+        .channel('worker-messages-' + currentUserId)
         .on('postgres_changes', 
             {
                 event: 'INSERT',
@@ -1006,15 +1006,8 @@ function setupRealtime() {
                         console.log('✅ Added new message');
                     }
                     
-                    // 🔥 CRITICAL: Sort after adding new message
-                    allMessages.sort((a, b) => {
-                        const dateA = new Date(a.created_at || 0);
-                        const dateB = new Date(b.created_at || 0);
-                        if (dateA - dateB !== 0) {
-                            return dateA - dateB;
-                        }
-                        return (a.id || '').localeCompare(b.id || '');
-                    });
+                    // 🔥🔥🔥 CRITICAL: Sort the global array
+                    sortMessages(allMessages);
                     
                     // 🔥 FORCE UI UPDATE
                     loadMessages(currentContact);
@@ -1049,7 +1042,7 @@ function setupRealtime() {
 }
 
 // ============================================================
-// 📝 SEND MESSAGE - FINAL FIXED VERSION
+// 📝 SEND MESSAGE - GUARANTEED FIXED
 // ============================================================
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -1098,14 +1091,7 @@ async function sendChatMessage() {
     allMessages.push(newMsg);
     
     // 🔥 Sort after adding temp message
-    allMessages.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        if (dateA - dateB !== 0) {
-            return dateA - dateB;
-        }
-        return (a.id || '').localeCompare(b.id || '');
-    });
+    sortMessages(allMessages);
     
     loadMessages(currentContact);
     updateContactPreviews();
@@ -1154,14 +1140,7 @@ async function sendChatMessage() {
             }
             
             // 🔥 Sort again after replacement
-            allMessages.sort((a, b) => {
-                const dateA = new Date(a.created_at || 0);
-                const dateB = new Date(b.created_at || 0);
-                if (dateA - dateB !== 0) {
-                    return dateA - dateB;
-                }
-                return (a.id || '').localeCompare(b.id || '');
-            });
+            sortMessages(allMessages);
             
             loadMessages(currentContact);
             updateContactPreviews();
@@ -1171,6 +1150,7 @@ async function sendChatMessage() {
             const index = allMessages.findIndex(m => m.id === tempId);
             if (index !== -1) {
                 allMessages.splice(index, 1);
+                sortMessages(allMessages);
                 loadMessages(currentContact);
                 updateContactPreviews();
             }
@@ -1181,6 +1161,7 @@ async function sendChatMessage() {
         const index = allMessages.findIndex(m => m.id === tempId);
         if (index !== -1) {
             allMessages.splice(index, 1);
+            sortMessages(allMessages);
             loadMessages(currentContact);
             updateContactPreviews();
         }
@@ -1292,19 +1273,12 @@ function showToast(message, type = 'success') {
 // 🚀 INITIALIZE
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📬 Admin Messages Loaded');
+    console.log('📬 Worker Messages Loaded');
     console.log('👤 User:', currentUserName);
     console.log('📋 Messages:', allMessages.length);
     
     // 🔥 Sort messages on load
-    allMessages.sort((a, b) => {
-        const dateA = new Date(a.created_at || 0);
-        const dateB = new Date(b.created_at || 0);
-        if (dateA - dateB !== 0) {
-            return dateA - dateB;
-        }
-        return (a.id || '').localeCompare(b.id || '');
-    });
+    sortMessages(allMessages);
     
     loadMessages('group');
     setTimeout(() => document.getElementById('chatInput')?.focus(), 500);
