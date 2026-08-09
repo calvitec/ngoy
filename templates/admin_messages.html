@@ -668,53 +668,25 @@ function sortMessages(messages) {
 }
 
 // ============================================================
-// 🔄 SILENT AUTO-SORT - Users won't notice
+// 🔄 FORCE AUTO-SORT - ALWAYS SORTS AND REFRESHES UI
 // ============================================================
 let autoSortInterval = null;
 let isSorting = false;
 
-function silentAutoSort() {
-    // Prevent multiple sorts from overlapping
+function forceAutoSort() {
     if (isSorting) return;
     isSorting = true;
     
     try {
-        // Only sort if there are messages
         if (allMessages && allMessages.length > 0) {
-            // Check if any messages are out of order
-            let needsSort = false;
-            for (let i = 1; i < allMessages.length; i++) {
-                const prev = new Date(allMessages[i-1].created_at || 0);
-                const curr = new Date(allMessages[i].created_at || 0);
-                if (prev > curr) {
-                    needsSort = true;
-                    break;
-                }
-            }
+            // Always sort the messages
+            sortMessages(allMessages);
             
-            // Only sort if needed (saves CPU)
-            if (needsSort) {
-                sortMessages(allMessages);
-                // Update UI without flashing
-                const container = document.getElementById('chatMessages');
-                const currentScroll = container ? container.scrollTop : 0;
-                const currentHeight = container ? container.scrollHeight : 0;
-                
-                loadMessages(currentContact);
-                
-                // Restore scroll position if user was scrolled
-                if (container) {
-                    const newHeight = container.scrollHeight;
-                    if (newHeight > currentHeight) {
-                        container.scrollTop = newHeight - currentHeight + currentScroll;
-                    } else {
-                        container.scrollTop = currentScroll;
-                    }
-                }
-            }
+            // Always refresh the UI to show sorted order
+            loadMessages(currentContact);
         }
     } catch (e) {
-        // Silent fail - don't show errors to user
+        // Silent fail
     } finally {
         isSorting = false;
     }
@@ -724,10 +696,10 @@ function startAutoSort() {
     if (autoSortInterval) {
         clearInterval(autoSortInterval);
     }
-    // Run every 2 seconds, but only if needed
-    autoSortInterval = setInterval(silentAutoSort, 2000);
-    // Run once immediately
-    setTimeout(silentAutoSort, 100);
+    // Run every 1 second
+    autoSortInterval = setInterval(forceAutoSort, 1000);
+    // Run immediately on load
+    setTimeout(forceAutoSort, 100);
 }
 
 function stopAutoSort() {
@@ -1061,9 +1033,8 @@ function setupRealtime() {
                         allMessages.push(normalizedMsg);
                     }
                     
-                    // Sort silently
+                    // Sort and refresh
                     sortMessages(allMessages);
-                    
                     loadMessages(currentContact);
                     updateContactPreviews();
                     updateUnreadCounts();
@@ -1328,7 +1299,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => document.getElementById('chatInput')?.focus(), 500);
     setupRealtime();
     
-    // 🔥 START SILENT AUTO-SORT (users won't notice)
+    // 🔥 START FORCE AUTO-SORT - runs every second
     startAutoSort();
     
     if (window.innerWidth <= 900) {
