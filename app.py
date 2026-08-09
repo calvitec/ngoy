@@ -1934,47 +1934,164 @@ def api_accounts():
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
     
-    elif request.method == 'POST':
-        try:
-            data = request.get_json()
-            account_data = {
-                'id': str(uuid.uuid4()),
-                'name': data.get('name'),
-                'platform': data.get('platform'),
-                'location': data.get('location'),
-                'proxy_id': data.get('proxy_id'),
-                'client_rate': safe_float(data.get('client_rate', 15.00)),
-                'status': data.get('status', 'active'),
-                'created_at': datetime.utcnow().isoformat(),
-                'updated_at': datetime.utcnow().isoformat()
-            }
-            result = supabase_request('POST', 'hs_accounts', data=account_data)
-            return jsonify({'success': True, 'data': result['data'], 'message': 'Account created successfully!'})
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
-    
-    elif request.method == 'PUT':
-        try:
-            data = request.get_json()
-            account_id = data.get('id')
-            if not account_id:
-                return jsonify({'success': False, 'error': 'Account ID required'}), 400
-            del data['id']
-            data['updated_at'] = datetime.utcnow().isoformat()
-            result = supabase_request('PATCH', 'hs_accounts', data=data, filters={'id': account_id})
-            return jsonify({'success': True, 'data': result['data'], 'message': 'Account updated successfully!'})
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
-    
-    elif request.method == 'DELETE':
-        try:
-            account_id = request.args.get('id')
-            if not account_id:
-                return jsonify({'success': False, 'error': 'Account ID required'}), 400
-            supabase_request('DELETE', 'hs_accounts', filters={'id': account_id})
-            return jsonify({'success': True, 'message': 'Account deleted successfully!'})
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
+   elif request.method == 'POST':
+    try:
+        user_role = session.get('user_role', 'worker')
+        user_id = session.get('user_id')
+        user_name = session.get('user_name', 'User')
+        user_email = session.get('user_email', '')
+        
+        data = request.get_json()
+        
+        # Required fields
+        if not data.get('title'):
+            return jsonify({'success': False, 'error': 'Title is required'}), 400
+        if not data.get('message'):
+            return jsonify({'success': False, 'error': 'Message is required'}), 400
+        
+        # ============================================================
+        # 🔥🔥🔥 FIX: FORCE ADMIN PERMISSIONS
+        # ============================================================
+        # Check if this is the admin user by email
+        admin_emails = ['admin@handshake.com', 'admin@example.com']
+        if user_email in admin_emails:
+            user_role = 'admin'
+            session['user_role'] = 'admin'  # Update session
+            print(f"✅✅✅ Forced admin role for: {user_email}")
+        
+        # Also check if user_id is the admin user from database
+        if user_id:
+            try:
+                user_check = supabase_request('GET', 'hs_users', filters={'id': user_id})
+                if user_check['data']:
+                    db_user = user_check['data'][0]
+                    if db_user.get('role') == 'admin':
+                        user_role = 'admin'
+                        session['user_role'] = 'admin'
+                        print(f"✅✅✅ Admin role confirmed from database")
+            except:
+                pass
+        
+        print(f"📤 Final user_role: {user_role}")
+        
+        # ============================================================
+        # 🔥 RECIPIENT MAPPING
+        # ============================================================
+        recipient_type = data.get('recipient_type', 'all_users')
+        
+        # ============================================================
+        # 🔥 PERMISSION CHECK
+        # ============================================================
+        allowed_recipients = []
+        
+        if user_role == 'admin':
+            allowed_recipients = ['all_workers', 'all_admins', 'all_users', 'specific_worker', 'specific_admin']
+        else:
+            allowed_recipients = ['all_workers', 'all_users', 'specific_worker']
+            if recipient_type in ['all_admins', 'specific_admin']:
+                return jsonify({
+                    'success': False, 
+                    'error': '❌ Workers cannot send messages to admins'
+                }), 403
+        
+        if recipient_type not in allowed_recipients:
+            return jsonify({
+                'success': False, 
+                'error': f'❌ You are not allowed to send to: {recipient_type}'
+            }), 403
+        
+        # ============================================================
+        # 🔥 MAP RECIPIENT TO AUDIENCE
+        # ============================================================
+        audience_map = {
+            'all_workers': 'workers',
+            'all_admins': 'admins',
+            'all_users': 'all',
+            'specific_worker': 'workers',
+            'specific_admin': 'admins'
+        }
+        audience = audience_map.get(recipient_type, 'all')
+        
+        print(f"📤 User: {user_name} ({user_role}) sending to: {recipient_type}")
+        
+        # ============================================================
+        # 🔥 GET TARGET USERS
+        # ============================================================
+        target_users = []
+        
+        if recipient_type == 'all_workers':
+            try:
+                users_response = supabase_request('GET', 'hs_users', filters={'role': 'worker'})
+                if users_response['data']:
+                    target_users = [u['id'] for u in users_response['data']]
+                    print(f"📤 Target: {len(target_users)} workers")
+            except Exception as e:
+                print(f"⚠️ Error getting workers: {e}")
+                
+        elif recipient_type == 'all_admins':
+            try:
+                users_response = supabase_request('GET', 'hs_users', filters={'role': 'admin'})
+                if users_response['data']:
+                    target_users = [u['id'] for u in users_response['data']]
+                    print(f"📤 Target: {len(target_users)} admins")
+            except Exception as e:
+                print(f"⚠️ Error getting admins: {e}")
+                
+        elif recipient_type == 'all_users':
+            try:
+                users_response = supabase_request('GET', 'hs_users')
+                if users_response['data']:
+                    target_users = [u['id'] for u in users_response['data']]
+                    print(f"📤 Target: {len(target_users)} all users")
+            except Exception as e:
+                print(f"⚠️ Error getting all users: {e}")
+                
+        elif recipient_type in ['specific_worker', 'specific_admin']:
+            recipient_id = data.get('recipient_id')
+            if recipient_id:
+                target_users = [recipient_id]
+                print(f"📤 Target: 1 specific user ({recipient_id})")
+        
+        # ============================================================
+        # 🔥 BUILD ANNOUNCEMENT DATA
+        # ============================================================
+        announcement_data = {
+            'id': str(uuid.uuid4()),
+            'title': data.get('title'),
+            'message': data.get('message'),
+            'audience': audience,
+            'priority': data.get('priority', 'normal'),
+            'target_users': json.dumps(target_users),
+            'read_by': json.dumps([]),
+            'created_by': user_id,
+            'created_by_name': user_name,
+            'created_by_role': user_role,
+            'created_at': datetime.utcnow().isoformat(),
+            'updated_at': datetime.utcnow().isoformat()
+        }
+        
+        print(f"📤 Creating announcement: {announcement_data['title']}")
+        print(f"📤 Audience: {announcement_data['audience']}")
+        print(f"📤 Target users: {len(target_users)}")
+        
+        result = supabase_request('POST', 'hs_announcements', data=announcement_data)
+        
+        if result.get('data'):
+            return jsonify({
+                'success': True,
+                'data': result['data'],
+                'message': '✅ Announcement sent successfully!',
+                'audience': audience,
+                'target_count': len(target_users)
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Failed to create announcement'}), 500
+            
+    except Exception as e:
+        print(f"❌ Error creating announcement: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # ============================================================
 # PROXIES
