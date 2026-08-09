@@ -1,4 +1,4 @@
-{% extends "worker_base.html" %}
+{% extends "admin_base.html" %}
 
 {% block title %}Messages - Handshake Manager{% endblock %}
 
@@ -519,7 +519,7 @@
 
 {% block content %}
 <!-- ============================================================
-     WORKER MESSAGES
+     ADMIN MESSAGES
      ============================================================ -->
 <div class="chat-container" id="chatContainer">
     
@@ -626,7 +626,7 @@
             </button>
         </div>
     </div>
-</div
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -650,7 +650,7 @@ let currentContact = 'group';
 let allMessages = {{ announcements|tojson }};
 let allUsers = {{ users|tojson }};
 let currentUserId = '{{ current_user_id }}';
-let currentUserName = '{{ user_name|default("Worker") }}';
+let currentUserName = '{{ user_name|default("Admin") }}';
 let realtimeChannel = null;
 
 // ============================================================
@@ -692,7 +692,6 @@ function loadMessages(contactId) {
         }
         
         // If timestamps are the same, sort by id
-        // This ensures consistent ordering even with same timestamps
         return (a.id || '').localeCompare(b.id || '');
     });
     
@@ -940,7 +939,7 @@ function setupRealtime() {
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
     realtimeChannel = sb
-        .channel('worker-messages-' + currentUserId)
+        .channel('admin-messages-' + currentUserId)
         .on('postgres_changes', 
             {
                 event: 'INSERT',
@@ -1293,7 +1292,7 @@ function showToast(message, type = 'success') {
 // 🚀 INITIALIZE
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('📬 Worker Messages Loaded');
+    console.log('📬 Admin Messages Loaded');
     console.log('👤 User:', currentUserName);
     console.log('📋 Messages:', allMessages.length);
     
