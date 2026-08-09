@@ -668,44 +668,22 @@ function sortMessages(messages) {
 }
 
 // ============================================================
-// 🔄 SILENT AUTO-SORT - Users won't notice
+// 🔄 FORCE AUTO-SORT - ALWAYS SORTS AND REFRESHES UI
 // ============================================================
 let autoSortInterval = null;
 let isSorting = false;
 
-function silentAutoSort() {
+function forceAutoSort() {
     if (isSorting) return;
     isSorting = true;
     
     try {
         if (allMessages && allMessages.length > 0) {
-            let needsSort = false;
-            for (let i = 1; i < allMessages.length; i++) {
-                const prev = new Date(allMessages[i-1].created_at || 0);
-                const curr = new Date(allMessages[i].created_at || 0);
-                if (prev > curr) {
-                    needsSort = true;
-                    break;
-                }
-            }
+            // Always sort the messages
+            sortMessages(allMessages);
             
-            if (needsSort) {
-                sortMessages(allMessages);
-                const container = document.getElementById('chatMessages');
-                const currentScroll = container ? container.scrollTop : 0;
-                const currentHeight = container ? container.scrollHeight : 0;
-                
-                loadMessages(currentContact);
-                
-                if (container) {
-                    const newHeight = container.scrollHeight;
-                    if (newHeight > currentHeight) {
-                        container.scrollTop = newHeight - currentHeight + currentScroll;
-                    } else {
-                        container.scrollTop = currentScroll;
-                    }
-                }
-            }
+            // Always refresh the UI to show sorted order
+            loadMessages(currentContact);
         }
     } catch (e) {
         // Silent fail
@@ -718,8 +696,10 @@ function startAutoSort() {
     if (autoSortInterval) {
         clearInterval(autoSortInterval);
     }
-    autoSortInterval = setInterval(silentAutoSort, 2000);
-    setTimeout(silentAutoSort, 100);
+    // Run every 1 second
+    autoSortInterval = setInterval(forceAutoSort, 1000);
+    // Run immediately on load
+    setTimeout(forceAutoSort, 100);
 }
 
 function stopAutoSort() {
@@ -735,8 +715,10 @@ function stopAutoSort() {
 function loadMessages(contactId) {
     const container = document.getElementById('chatMessages');
     
+    // Ensure messages are sorted
     sortMessages(allMessages);
     
+    // Filter messages
     let messages = [];
     if (contactId === 'group') {
         messages = allMessages.filter(m => {
@@ -1051,8 +1033,8 @@ function setupRealtime() {
                         allMessages.push(normalizedMsg);
                     }
                     
+                    // Sort and refresh
                     sortMessages(allMessages);
-                    
                     loadMessages(currentContact);
                     updateContactPreviews();
                     updateUnreadCounts();
@@ -1310,13 +1292,14 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('👤 User:', currentUserName);
     console.log('📋 Messages:', allMessages.length);
     
+    // Sort messages on load
     sortMessages(allMessages);
     
     loadMessages('group');
     setTimeout(() => document.getElementById('chatInput')?.focus(), 500);
     setupRealtime();
     
-    // 🔥 START SILENT AUTO-SORT
+    // 🔥 START FORCE AUTO-SORT - runs every second
     startAutoSort();
     
     if (window.innerWidth <= 900) {
