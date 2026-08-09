@@ -668,17 +668,76 @@ function sortMessages(messages) {
 }
 
 // ============================================================
-// 📋 LOAD MESSAGES - GUARANTEED FIXED VERSION
+// 🔄 SILENT AUTO-SORT - Users won't notice
+// ============================================================
+let autoSortInterval = null;
+let isSorting = false;
+
+function silentAutoSort() {
+    if (isSorting) return;
+    isSorting = true;
+    
+    try {
+        if (allMessages && allMessages.length > 0) {
+            let needsSort = false;
+            for (let i = 1; i < allMessages.length; i++) {
+                const prev = new Date(allMessages[i-1].created_at || 0);
+                const curr = new Date(allMessages[i].created_at || 0);
+                if (prev > curr) {
+                    needsSort = true;
+                    break;
+                }
+            }
+            
+            if (needsSort) {
+                sortMessages(allMessages);
+                const container = document.getElementById('chatMessages');
+                const currentScroll = container ? container.scrollTop : 0;
+                const currentHeight = container ? container.scrollHeight : 0;
+                
+                loadMessages(currentContact);
+                
+                if (container) {
+                    const newHeight = container.scrollHeight;
+                    if (newHeight > currentHeight) {
+                        container.scrollTop = newHeight - currentHeight + currentScroll;
+                    } else {
+                        container.scrollTop = currentScroll;
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        // Silent fail
+    } finally {
+        isSorting = false;
+    }
+}
+
+function startAutoSort() {
+    if (autoSortInterval) {
+        clearInterval(autoSortInterval);
+    }
+    autoSortInterval = setInterval(silentAutoSort, 2000);
+    setTimeout(silentAutoSort, 100);
+}
+
+function stopAutoSort() {
+    if (autoSortInterval) {
+        clearInterval(autoSortInterval);
+        autoSortInterval = null;
+    }
+}
+
+// ============================================================
+// 📋 LOAD MESSAGES - SMOOTH VERSION
 // ============================================================
 function loadMessages(contactId) {
     const container = document.getElementById('chatMessages');
     
-    // 🔥🔥🔥 STEP 1: SORT THE GLOBAL allMessages ARRAY FIRST
     sortMessages(allMessages);
     
-    // 🔥 STEP 2: Now filter from the SORTED array
     let messages = [];
-    
     if (contactId === 'group') {
         messages = allMessages.filter(m => {
             const audience = m.audience || '';
@@ -716,7 +775,6 @@ function loadMessages(contactId) {
     let messageGroup = null;
     let groupedMessages = [];
     
-    // Group messages by date and sender
     messages.forEach((msg) => {
         const msgDate = msg.created_at ? msg.created_at.substring(0, 10) : '';
         const senderId = msg.sender_id || 'unknown';
@@ -871,7 +929,6 @@ function updateUnreadCounts() {
         }
     });
     
-    // Group badge
     const groupUnread = allMessages.filter(m => {
         if (m.sender_id === currentUserId) return false;
         if (m.is_temp) return false;
@@ -931,7 +988,7 @@ function searchContacts() {
 }
 
 // ============================================================
-// 🔔 SUPABASE REAL-TIME LISTENER - GUARANTEED FIXED
+// 🔔 SUPABASE REAL-TIME LISTENER
 // ============================================================
 function setupRealtime() {
     console.log('🔌 Setting up real-time listener...');
@@ -947,11 +1004,8 @@ function setupRealtime() {
                 table: TABLE_NAME
             },
             (payload) => {
-                console.log('🔔🔔🔔 REAL-TIME EVENT RECEIVED! 🔔🔔🔔');
                 const newMsg = payload.new;
-                console.log('📝 New message:', newMsg);
                 
-                // Normalize the message data
                 const normalizedMsg = {
                     id: newMsg.id,
                     sender_id: newMsg.created_by || newMsg.sender_id || 'unknown',
@@ -966,7 +1020,6 @@ function setupRealtime() {
                     priority: newMsg.priority || 'normal'
                 };
                 
-                // Check if message is for this user
                 let isForMe = false;
                 if (normalizedMsg.audience === 'all' || normalizedMsg.audience === 'all_users') {
                     isForMe = true;
@@ -978,17 +1031,13 @@ function setupRealtime() {
                 }
                 
                 const isFromMe = normalizedMsg.sender_id === currentUserId;
-                
-                // Add message if it's for me or in current chat
                 const shouldAdd = isForMe || 
                                  normalizedMsg.sender_id === currentContact || 
                                  (normalizedMsg.target_users && normalizedMsg.target_users.includes(currentContact));
                 
                 if (shouldAdd) {
-                    // Check if message already exists
                     const exists = allMessages.some(m => m.id === normalizedMsg.id);
                     
-                    // 🔥 Check if there's a temp message with same content
                     const tempMessage = allMessages.find(m => 
                         m.is_temp && 
                         m.message === normalizedMsg.message && 
@@ -996,25 +1045,18 @@ function setupRealtime() {
                     );
                     
                     if (tempMessage) {
-                        // Replace temp with real message
                         const index = allMessages.indexOf(tempMessage);
                         allMessages[index] = normalizedMsg;
-                        console.log('✅ Replaced temp message with real one');
                     } else if (!exists) {
-                        // New message - add it
                         allMessages.push(normalizedMsg);
-                        console.log('✅ Added new message');
                     }
                     
-                    // 🔥🔥🔥 CRITICAL: Sort the global array
                     sortMessages(allMessages);
                     
-                    // 🔥 FORCE UI UPDATE
                     loadMessages(currentContact);
                     updateContactPreviews();
                     updateUnreadCounts();
                     
-                    // Show notification (only if not from me)
                     if (!isFromMe) {
                         const senderName = normalizedMsg.sender_name || 'Someone';
                         showToast(`📩 New message from ${senderName}`, 'info');
@@ -1042,7 +1084,7 @@ function setupRealtime() {
 }
 
 // ============================================================
-// 📝 SEND MESSAGE - GUARANTEED FIXED
+// 📝 SEND MESSAGE
 // ============================================================
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -1074,7 +1116,6 @@ async function sendChatMessage() {
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
-    // 🔥 Optimistic update with proper temp ID
     const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(7);
     const newMsg = {
         id: tempId,
@@ -1089,10 +1130,7 @@ async function sendChatMessage() {
     };
     
     allMessages.push(newMsg);
-    
-    // 🔥 Sort after adding temp message
     sortMessages(allMessages);
-    
     loadMessages(currentContact);
     updateContactPreviews();
     
@@ -1133,20 +1171,16 @@ async function sendChatMessage() {
                 created_at: new Date().toISOString()
             };
             
-            // 🔥 Replace temp with real message
             const index = allMessages.findIndex(m => m.id === tempId);
             if (index !== -1) {
                 allMessages[index] = realMsg;
             }
             
-            // 🔥 Sort again after replacement
             sortMessages(allMessages);
-            
             loadMessages(currentContact);
             updateContactPreviews();
             
         } else {
-            // 🔥 Remove temp message on failure
             const index = allMessages.findIndex(m => m.id === tempId);
             if (index !== -1) {
                 allMessages.splice(index, 1);
@@ -1157,7 +1191,6 @@ async function sendChatMessage() {
             showToast('❌ ' + (result.error || 'Failed to send message'), 'error');
         }
     } catch (error) {
-        // 🔥 Remove temp message on error
         const index = allMessages.findIndex(m => m.id === tempId);
         if (index !== -1) {
             allMessages.splice(index, 1);
@@ -1277,12 +1310,14 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('👤 User:', currentUserName);
     console.log('📋 Messages:', allMessages.length);
     
-    // 🔥 Sort messages on load
     sortMessages(allMessages);
     
     loadMessages('group');
     setTimeout(() => document.getElementById('chatInput')?.focus(), 500);
     setupRealtime();
+    
+    // 🔥 START SILENT AUTO-SORT
+    startAutoSort();
     
     if (window.innerWidth <= 900) {
         document.getElementById('chatSidebar').style.display = 'block';
@@ -1295,6 +1330,7 @@ window.addEventListener('beforeunload', function() {
     if (realtimeChannel) {
         realtimeChannel.unsubscribe();
     }
+    stopAutoSort();
 });
 
 // Handle resize
