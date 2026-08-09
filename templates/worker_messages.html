@@ -626,7 +626,7 @@
             </button>
         </div>
     </div>
-</div>
+</div
 {% endblock %}
 
 {% block extra_js %}
@@ -654,7 +654,7 @@ let currentUserName = '{{ user_name|default("Worker") }}';
 let realtimeChannel = null;
 
 // ============================================================
-// 📋 LOAD MESSAGES - FIXED WITH PROPER SORTING
+// 📋 LOAD MESSAGES - FINAL FIXED VERSION
 // ============================================================
 function loadMessages(contactId) {
     const container = document.getElementById('chatMessages');
@@ -681,11 +681,19 @@ function loadMessages(contactId) {
         });
     }
     
-    // 🔥🔥🔥 CRITICAL FIX: Sort by created_at (oldest first)
+    // 🔥🔥🔥 FINAL FIX: Sort by created_at, then by id
     messages.sort((a, b) => {
         const dateA = new Date(a.created_at || 0);
         const dateB = new Date(b.created_at || 0);
-        return dateA - dateB;
+        
+        // If timestamps are different, sort by time
+        if (dateA - dateB !== 0) {
+            return dateA - dateB;
+        }
+        
+        // If timestamps are the same, sort by id
+        // This ensures consistent ordering even with same timestamps
+        return (a.id || '').localeCompare(b.id || '');
     });
     
     if (messages.length === 0) {
@@ -924,7 +932,7 @@ function searchContacts() {
 }
 
 // ============================================================
-// 🔔 SUPABASE REAL-TIME LISTENER
+// 🔔 SUPABASE REAL-TIME LISTENER - FINAL FIXED VERSION
 // ============================================================
 function setupRealtime() {
     console.log('🔌 Setting up real-time listener...');
@@ -980,28 +988,45 @@ function setupRealtime() {
                 if (shouldAdd) {
                     // Check if message already exists
                     const exists = allMessages.some(m => m.id === normalizedMsg.id);
-                    if (!exists) {
-                        console.log('✅ Adding message to UI!');
+                    
+                    // 🔥 Check if there's a temp message with same content
+                    const tempMessage = allMessages.find(m => 
+                        m.is_temp && 
+                        m.message === normalizedMsg.message && 
+                        m.sender_id === currentUserId
+                    );
+                    
+                    if (tempMessage) {
+                        // Replace temp with real message
+                        const index = allMessages.indexOf(tempMessage);
+                        allMessages[index] = normalizedMsg;
+                        console.log('✅ Replaced temp message with real one');
+                    } else if (!exists) {
+                        // New message - add it
                         allMessages.push(normalizedMsg);
-                        
-                        // 🔥 CRITICAL: Sort after adding new message
-                        allMessages.sort((a, b) => {
-                            const dateA = new Date(a.created_at || 0);
-                            const dateB = new Date(b.created_at || 0);
+                        console.log('✅ Added new message');
+                    }
+                    
+                    // 🔥 CRITICAL: Sort after adding new message
+                    allMessages.sort((a, b) => {
+                        const dateA = new Date(a.created_at || 0);
+                        const dateB = new Date(b.created_at || 0);
+                        if (dateA - dateB !== 0) {
                             return dateA - dateB;
-                        });
-                        
-                        // 🔥 FORCE UI UPDATE
-                        loadMessages(currentContact);
-                        updateContactPreviews();
-                        updateUnreadCounts();
-                        
-                        // Show notification (only if not from me)
-                        if (!isFromMe) {
-                            const senderName = normalizedMsg.sender_name || 'Someone';
-                            showToast(`📩 New message from ${senderName}`, 'info');
-                            playNotificationSound();
                         }
+                        return (a.id || '').localeCompare(b.id || '');
+                    });
+                    
+                    // 🔥 FORCE UI UPDATE
+                    loadMessages(currentContact);
+                    updateContactPreviews();
+                    updateUnreadCounts();
+                    
+                    // Show notification (only if not from me)
+                    if (!isFromMe) {
+                        const senderName = normalizedMsg.sender_name || 'Someone';
+                        showToast(`📩 New message from ${senderName}`, 'info');
+                        playNotificationSound();
                     }
                 }
             }
@@ -1025,7 +1050,7 @@ function setupRealtime() {
 }
 
 // ============================================================
-// 📝 SEND MESSAGE
+// 📝 SEND MESSAGE - FINAL FIXED VERSION
 // ============================================================
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
@@ -1057,8 +1082,8 @@ async function sendChatMessage() {
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     
-    // Optimistic update
-    const tempId = 'temp_' + Date.now();
+    // 🔥 Optimistic update with proper temp ID
+    const tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(7);
     const newMsg = {
         id: tempId,
         sender_id: currentUserId,
@@ -1072,6 +1097,17 @@ async function sendChatMessage() {
     };
     
     allMessages.push(newMsg);
+    
+    // 🔥 Sort after adding temp message
+    allMessages.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        if (dateA - dateB !== 0) {
+            return dateA - dateB;
+        }
+        return (a.id || '').localeCompare(b.id || '');
+    });
+    
     loadMessages(currentContact);
     updateContactPreviews();
     
@@ -1112,15 +1148,27 @@ async function sendChatMessage() {
                 created_at: new Date().toISOString()
             };
             
+            // 🔥 Replace temp with real message
             const index = allMessages.findIndex(m => m.id === tempId);
             if (index !== -1) {
                 allMessages[index] = realMsg;
             }
             
+            // 🔥 Sort again after replacement
+            allMessages.sort((a, b) => {
+                const dateA = new Date(a.created_at || 0);
+                const dateB = new Date(b.created_at || 0);
+                if (dateA - dateB !== 0) {
+                    return dateA - dateB;
+                }
+                return (a.id || '').localeCompare(b.id || '');
+            });
+            
             loadMessages(currentContact);
             updateContactPreviews();
             
         } else {
+            // 🔥 Remove temp message on failure
             const index = allMessages.findIndex(m => m.id === tempId);
             if (index !== -1) {
                 allMessages.splice(index, 1);
@@ -1130,6 +1178,7 @@ async function sendChatMessage() {
             showToast('❌ ' + (result.error || 'Failed to send message'), 'error');
         }
     } catch (error) {
+        // 🔥 Remove temp message on error
         const index = allMessages.findIndex(m => m.id === tempId);
         if (index !== -1) {
             allMessages.splice(index, 1);
@@ -1247,6 +1296,16 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📬 Worker Messages Loaded');
     console.log('👤 User:', currentUserName);
     console.log('📋 Messages:', allMessages.length);
+    
+    // 🔥 Sort messages on load
+    allMessages.sort((a, b) => {
+        const dateA = new Date(a.created_at || 0);
+        const dateB = new Date(b.created_at || 0);
+        if (dateA - dateB !== 0) {
+            return dateA - dateB;
+        }
+        return (a.id || '').localeCompare(b.id || '');
+    });
     
     loadMessages('group');
     setTimeout(() => document.getElementById('chatInput')?.focus(), 500);
